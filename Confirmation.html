@@ -120,6 +120,35 @@
     }
     .submit-button:hover { background-color: #c4005f; }
     .submit-button:disabled { background-color: #cccccc; cursor: not-allowed; }
+    
+    /* NEW: Logout Button Style */
+    #logout-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #6c757d;
+        font-size: 14px;
+        text-decoration: none;
+    }
+    #logout-link:hover {
+        text-decoration: underline;
+    }
+
+    /* --- NEW: MOBILE RESPONSIVE STYLES --- */
+    @media (max-width: 600px) {
+      body {
+        /* Reduce padding on mobile for more space */
+        padding: 20px 15px;
+      }
+      .container {
+        /* Reduce horizontal padding inside the card */
+        padding: 25px 20px;
+      }
+      h1 {
+        /* Make the main title slightly smaller */
+        font-size: 1.8rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -139,6 +168,9 @@
         <input type="text" id="searchBar" placeholder="Search...">
       </div>
       <div id="customerList"></div>
+      
+      <!-- NEW: Logout Link in Search View -->
+      <a href="#" id="logout-link-search">Logout</a>
     </div>
 
     <!-- Assignment View -->
@@ -191,6 +223,9 @@
 
       <button id="submit-button" class="submit-button">Confirm Delivery</button>
       <a href="#" id="backToSearch">Search for another customer</a>
+      
+      <!-- NEW: Logout Link in Assignment View -->
+      <a href="#" id="logout-link-assign">Logout</a>
     </div>
   </div>
 
@@ -202,24 +237,27 @@
   </div>
 
   <script>
-    // --- NEW: AUTHENTICATION CHECK ---
-    // This part runs as soon as the page loads
+    // --- AUTHENTICATION & LOGOUT ---
+    const loggedInUserData = localStorage.getItem('loggedInUser');
+
+    function handleLogout() {
+        localStorage.removeItem('loggedInUser');
+        window.location.href = 'login.html';
+    }
+    
     window.addEventListener('DOMContentLoaded', () => {
-        const loggedInUserData = localStorage.getItem('loggedInUser');
-        
         if (!loggedInUserData) {
-            // If no user data is found, redirect to login page
-            window.location.href = 'login.html'; // Make sure your login page is named login.html
+            window.location.href = 'login.html';
         } else {
-            // If user data is found, parse it
             const loggedInUser = JSON.parse(loggedInUserData);
-            
-            // Automatically fill the Agent Name input field
             const agentNameInput = document.getElementById('agent-name-input');
             if (agentNameInput && loggedInUser.fullName) {
                 agentNameInput.value = loggedInUser.fullName;
             }
         }
+        // Attach logout event listeners
+        document.getElementById('logout-link-search').addEventListener('click', handleLogout);
+        document.getElementById('logout-link-assign').addEventListener('click', handleLogout);
     });
 
     const allDOMElements = {
@@ -390,7 +428,7 @@
         sheetFormData.append('SIM Barcode', allDOMElements.simInput.value);
         sheetFormData.append('Agent', allDOMElements.agentNameInput.value);
 
-        const sheetUrl = 'https://script.google.com/macros/s/AKfycbzC9F_ZeIWsPmMLsIFOm5NIrUZSS-JvBjIoB5tJEc-1T-pptFcjHC_KnPTmoJ_IvyOE2g/exec'; // <-- IMPORTANT: Remember to paste your script URL
+        const sheetUrl = 'https://script.google.com/macros/s/AKfycbzC9F_ZeIWsPmMLsIFOm5NIrUZSS-JvBjIoB5tJEc-1T-pptFcjHC_KnPTmoJ_IvyOE2g/exec';
         
         const sheetResponse = await fetch(sheetUrl, {
             method: 'POST',
