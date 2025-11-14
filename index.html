@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technician Portal Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(135deg, #e0f0ff, #f8faff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-card {
+      background: white;
+      padding: 2rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 320px;
+    }
+
+    .login-icon {
+      font-size: 40px;
+      background: #3b82f6;
+      color: white;
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      background: #ff007f;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      width: 100%;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e60073;
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-icon">👤</div>
+      <h2>Technician Portal</h2>
+      <p>Sign in to access delivery tools</p>
+
+      <form id="loginForm">
+        <label>Username</label>
+        <input
+          type="text"
+          id="username"
+          placeholder="Enter your username"
+          required
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter your password"
+          required
+        />
+
+        <button type="submit">Sign In</button>
+      </form>
+
+      <p id="error" class="error"></p>
+    </div>
+  </div>
+
+  <script>
+    const admins = [
+      { id: 1, login: "0726665675", fullName: "Mobeen Bhamjee" },
+      { id: 5, login: "0768162889", fullName: "Masood Bhamjee" },
+      { id: 6, login: "0712224025", fullName: "Ngaoko David Ralio" },
+      { id: 7, login: "0780979587", fullName: "Thabang Lehloenya" },
+      { id: 12, login: "0733891382", fullName: "Aysha" },
+      { id: 15, login: "0845807973", fullName: "Mohamed Mukhtar" },
+      { id: 17, login: "0672649653", fullName: "Thabiso Lehloenya" },
+      { id: 18, login: "0814090910", fullName: "Thabiso Tlatsa" },
+      { id: 19, login: "0636105267", fullName: "Thami Moisela" },
+      { id: 21, login: "0782407894", fullName: "Neo" },
+      { id: 22, login: "0792822237", fullName: "Salmaan Mahomed" },
+      { id: 23, login: "0766238727", fullName: "Mpoi" },
+    ];
+
+    const loginForm = document.getElementById("loginForm");
+    const error = document.getElementById("error");
+
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+
+      // Check if username exists in admin list
+      const admin = admins.find((a) => a.login === username);
+
+      if (admin) {
+        // Save technician info (optional for future use)
+        localStorage.setItem("loggedInUser", JSON.stringify(admin));
+
+        // Redirect to main page
+        window.location.href = "Confirmation.html";
+      } else {
+        error.textContent = "Invalid login. Please try again.";
+      }
+    });
+  </script>
+</body>
+</html>

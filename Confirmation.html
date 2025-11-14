@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Assignment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #e80074;
+      --border-color: #ddd;
+      --background-color: #f8f9fa;
+      --card-background: #fff;
+      --text-color: #333;
+      --subtle-text-color: #666;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 50px 15px;
+      color: var(--text-color);
+      box-sizing: border-box;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background-color: var(--card-background);
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      position: relative;
+    }
+    #assignmentView { display: none; }
+    h1 { text-align: center; color: var(--primary-color); font-weight: 700; margin-bottom: 10px; }
+    .subtitle { text-align: center; color: var(--subtle-text-color); margin-bottom: 30px; }
+    .search-wrapper { position: relative; }
+    #searchBar {
+      width: 100%; padding: 15px 15px 15px 45px;
+      border-radius: 8px; border: 1px solid var(--border-color);
+      font-size: 16px; transition: border-color 0.3s, box-shadow 0.3s;
+      box-sizing: border-box;
+    }
+    #searchBar:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(232,0,116,0.2); }
+    .search-wrapper svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; }
+    #customerList { margin-top: 20px; max-height: 400px; overflow-y: auto; }
+    .customer-card {
+      padding: 15px; border: 1px solid var(--border-color);
+      border-radius: 8px; margin-bottom: 10px; cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .customer-card:hover { background-color: #fdf6fa; border-color: var(--primary-color); }
+    .customer-name { font-weight: 500; font-size: 18px; margin-bottom: 5px; }
+    .customer-details { font-size: 14px; color: var(--subtle-text-color); }
+    .no-results { text-align: center; color: var(--subtle-text-color); padding: 20px; }
+    .selected-customer-section h2 { font-size: 18px; font-weight: 500; margin-bottom: 15px; }
+    .customer-info-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .customer-info-grid div { color: var(--subtle-text-color); }
+    .customer-info-grid div span { font-weight: 500; color: var(--text-color); }
+    .device-section { margin-top: 25px; }
+    .device-section h3 { font-size: 16px; font-weight: 500; margin-bottom: 15px; }
+    .device-input {
+      width: 100%; padding: 12px; border-radius: 8px;
+      border: 1px solid var(--border-color); font-size: 16px;
+      box-sizing: border-box; margin-top: 10px;
+    }
+    .scan-button, .photo-button {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; padding: 12px; border: 1px solid var(--border-color);
+      background-color: #f9f9f9; border-radius: 8px;
+      cursor: pointer; font-size: 16px; color: var(--text-color);
+    }
+    .scan-button { border-style: dashed; color: var(--subtle-text-color); }
+    .scan-button svg { margin-right: 10px; }
+    .photo-preview {
+      width: 100%; margin-top: 15px; border-radius: 8px;
+      object-fit: cover; border: 2px dashed var(--border-color);
+      min-height: 150px; display: none;
+    }
+    .photo-preview.has-image { display: block; }
+    .hidden-file-input { display: none; }
+    .signature-pad-wrapper {
+      position: relative; width: 100%; height: 200px;
+      border: 2px dashed var(--border-color); border-radius: 8px; margin-bottom: 10px;
+    }
+    #signature-canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    #clear-signature-btn {
+      width: 100%; padding: 10px; background: #6c757d;
+      color: white; border: none; border-radius: 8px; cursor: pointer;
+    }
+    #backToSearch {
+      display: block; text-align: center; margin-top: 30px;
+      color: var(--primary-color); text-decoration: none; font-weight: 500;
+    }
+    #scanner-container {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000; justify-content: center; align-items: center;
+    }
+    .scanner-box {
+      width: 90%; max-width: 450px; background: white; border-radius: 10px;
+      padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+    #qr-reader { width: 100%; border: 1px solid var(--border-color); border-radius: 8px; }
+    #cancel-scan {
+      width: 100%; padding: 12px; margin-top: 15px; background-color: #f44336;
+      color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;
+    }
+    .submit-button {
+      width: 100%; padding: 15px; margin-top: 20px; background-color: var(--primary-color);
+      color: white; border: none; border-radius: 8px; font-size: 18px;
+      font-weight: 500; cursor: pointer; transition: background-color 0.3s;
+    }
+    .submit-button:hover { background-color: #c4005f; }
+    .submit-button:disabled { background-color: #cccccc; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Search View -->
+    <div id="searchView">
+      <h1>Delivery Confirmation</h1>
+      <p class="subtitle">Search customer by name or customer ID</p>
+      <div class="search-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001
+                   c.03.04.062.078.098.115l3.85 3.85a1 1 0 0
+                   0 1.415-1.414l-3.85-3.85a1.007 1.007
+                   0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1
+                   1-11 0 5.5 5.5 0 0 1 11 0z"/>
+        </svg>
+        <input type="text" id="searchBar" placeholder="Search...">
+      </div>
+      <div id="customerList"></div>
+    </div>
+
+    <!-- Assignment View -->
+    <div id="assignmentView">
+      <h1>Delivery Confirmation</h1>
+      <p class="subtitle">Assign devices and capture proof</p>
+      <div class="selected-customer-section">
+        <h2>Selected Customer</h2>
+        <div id="selectedCustomerInfo" class="customer-info-grid"></div>
+      </div>
+
+      <div class="device-section">
+        <h3>Agent Name</h3>
+        <input type="text" id="agent-name-input" class="device-input" placeholder="Enter your name..." readonly>
+      </div>
+      
+      <div class="device-section">
+        <h3>Router</h3>
+        <button type="button" class="scan-button" data-target="router-input">Scan Router QR Code</button>
+        <input type="text" id="router-input" class="device-input" placeholder="Or enter router barcode manually...">
+      </div>
+
+      <div class="device-section">
+        <h3>SIM Card</h3>
+        <button type="button" class="scan-button" data-target="sim-input">Scan SIM QR Code</button>
+        <input type="text" id="sim-input" class="device-input" placeholder="Or enter SIM barcode manually...">
+      </div>
+
+      <div class="device-section">
+        <h3>ID Photo</h3>
+        <button type="button" class="photo-button" data-target="id-photo-input">Take Photo of ID</button>
+        <img id="id-photo-preview" class="photo-preview" alt="ID Photo Preview">
+        <input type="file" id="id-photo-input" class="hidden-file-input" accept="image/*" capture="environment">
+      </div>
+
+      <div class="device-section">
+        <h3>Customer Premises Photo</h3>
+        <button type="button" class="photo-button" data-target="premises-photo-input">Take Photo of Premises</button>
+        <img id="premises-photo-preview" class="photo-preview" alt="Premises Photo Preview">
+        <input type="file" id="premises-photo-input" class="hidden-file-input" accept="image/*" capture="environment">
+      </div>
+
+      <div class="device-section">
+        <h3>Customer Signature</h3>
+        <div class="signature-pad-wrapper">
+          <canvas id="signature-canvas"></canvas>
+        </div>
+        <button type="button" id="clear-signature-btn">Clear Signature</button>
+      </div>
+
+      <button id="submit-button" class="submit-button">Confirm Delivery</button>
+      <a href="#" id="backToSearch">Search for another customer</a>
+    </div>
+  </div>
+
+  <div id="scanner-container">
+    <div class="scanner-box">
+      <div id="qr-reader"></div>
+      <button id="cancel-scan">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    // --- NEW: AUTHENTICATION CHECK ---
+    // This part runs as soon as the page loads
+    window.addEventListener('DOMContentLoaded', () => {
+        const loggedInUserData = localStorage.getItem('loggedInUser');
+        
+        if (!loggedInUserData) {
+            // If no user data is found, redirect to login page
+            window.location.href = 'login.html'; // Make sure your login page is named login.html
+        } else {
+            // If user data is found, parse it
+            const loggedInUser = JSON.parse(loggedInUserData);
+            
+            // Automatically fill the Agent Name input field
+            const agentNameInput = document.getElementById('agent-name-input');
+            if (agentNameInput && loggedInUser.fullName) {
+                agentNameInput.value = loggedInUser.fullName;
+            }
+        }
+    });
+
+    const allDOMElements = {
+      searchView: document.getElementById('searchView'),
+      assignmentView: document.getElementById('assignmentView'),
+      searchBar: document.getElementById('searchBar'),
+      customerList: document.getElementById('customerList'),
+      selectedCustomerInfo: document.getElementById('selectedCustomerInfo'),
+      backToSearchLink: document.getElementById('backToSearch'),
+      scannerContainer: document.getElementById('scanner-container'),
+      cancelScanBtn: document.getElementById('cancel-scan'),
+      signatureCanvas: document.getElementById('signature-canvas'),
+      clearSignatureBtn: document.getElementById('clear-signature-btn'),
+      submitBtn: document.getElementById('submit-button'),
+      idPhotoInput: document.getElementById('id-photo-input'),
+      premisesPhotoInput: document.getElementById('premises-photo-input'),
+      agentNameInput: document.getElementById('agent-name-input'),
+      routerInput: document.getElementById('router-input'),
+      simInput: document.getElementById('sim-input')
+    };
+
+    const sheetURL = "https://opensheet.elk.sh/1MkikAnYCWwW7T6S1Vo4tJsPicYoK05SzBN3DE_LbxmQ/Splynx_Customers";
+    let allCustomers = [];
+    let selectedCustomer = null;
+    let signaturePad;
+    let currentScanTargetId = null;
+
+    // --- QR SCANNER ---
+    const html5QrCode = new Html5Qrcode("qr-reader");
+    const onScanSuccess = (decodedText) => {
+      if (currentScanTargetId)
+        document.getElementById(currentScanTargetId).value = decodedText;
+      stopScanner();
+    };
+    function startScanner(targetInputId) {
+      currentScanTargetId = targetInputId;
+      allDOMElements.scannerContainer.style.display = 'flex';
+      html5QrCode.start({ facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess,
+        () => {}
+      ).catch(() => { alert("Could not start scanner"); stopScanner(); });
+    }
+    function stopScanner() {
+      html5QrCode.stop().catch(()=>{}).finally(()=>{
+        allDOMElements.scannerContainer.style.display = 'none';
+        currentScanTargetId = null;
+      });
+    }
+
+    // --- SIGNATURE PAD ---
+    function resizeCanvas() {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const canvas = allDOMElements.signatureCanvas;
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+      if (signaturePad) {
+        const data = signaturePad.toData();
+        signaturePad.clear();
+        signaturePad.fromData(data);
+      }
+    }
+
+    // --- LOAD CUSTOMERS ---
+    async function loadCustomers() {
+      try {
+        const res = await fetch(sheetURL);
+        if (!res.ok) throw new Error("Failed to load customers");
+        allCustomers = await res.json();
+      } catch (err) {
+        allDOMElements.customerList.innerHTML = '<p class="no-results">Error loading data.</p>';
+      }
+    }
+
+    function displayFilteredCustomers(filtered) {
+      allDOMElements.customerList.innerHTML = "";
+      if (filtered.length === 0) {
+        allDOMElements.customerList.innerHTML = '<p class="no-results">No customers found.</p>';
+        return;
+      }
+      filtered.forEach(c => {
+        const div = document.createElement('div');
+        div.className = "customer-card";
+        div.innerHTML = `<div class="customer-name">${c.name || "Unknown"}</div>
+                         <div class="customer-details">Customer ID: ${c.id || "N/A"}</div>`;
+        div.onclick = () => selectCustomerHandler(c);
+        allDOMElements.customerList.appendChild(div);
+      });
+    }
+
+    function selectCustomerHandler(customer) {
+      selectedCustomer = customer;
+      allDOMElements.selectedCustomerInfo.innerHTML = `
+        <div>Name: <span>${customer.name}</span></div>
+        <div>Customer ID: <span>${customer.id}</span></div>`;
+      allDOMElements.searchView.style.display = 'none';
+      allDOMElements.assignmentView.style.display = 'block';
+      if (!signaturePad)
+        signaturePad = new SignaturePad(allDOMElements.signatureCanvas, { backgroundColor: 'white' });
+      resizeCanvas();
+    }
+
+    // --- FILE HELPERS ---
+    const dataURLtoFile = (dataurl, filename) => {
+      const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]); let n = bstr.length; const u8arr = new Uint8Array(n);
+      while (n--) u8arr[n] = bstr.charCodeAt(n);
+      return new File([u8arr], filename, { type: mime });
+    };
+
+    // --- SUBMIT DELIVERY ---
+    async function submitDelivery() {
+      if (!selectedCustomer || !allDOMElements.routerInput.value || !allDOMElements.simInput.value || !allDOMElements.agentNameInput.value) {
+        alert("Please fill in Customer, Agent, Router, and SIM card details.");
+        return;
+      }
+      if (signaturePad.isEmpty()) { 
+        alert("Please provide a customer signature."); 
+        return; 
+      }
+
+      const submitBtn = allDOMElements.submitBtn;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        const idPhotoFile = allDOMElements.idPhotoInput.files[0];
+        const premisesPhotoFile = allDOMElements.premisesPhotoInput.files[0];
+        const signatureFile = dataURLtoFile(signaturePad.toDataURL('image/png'), 'signature.png');
+
+        const filesToUpload = [
+          { file: idPhotoFile, title: "ID Copy", description: "Customer ID Copy" },
+          { file: premisesPhotoFile, title: "Customer Premises Photo", description: "Photo of installation site" },
+          { file: signatureFile, title: "Signature", description: "Customer Signature" }
+        ];
+
+        const authHeader = "Basic MWY3M2M4ODUzY2FiYzg3ZTI0MjIyOWE5NDU1NDg4MDE6MWU2MTM4NzAwMjA0MjlmNjM3NzRjYmYwZjU5ZGIxMTY=";
+        const customerId = selectedCustomer.id;
+
+        for (const item of filesToUpload) {
+          if (!item.file) continue;
+
+          const createRes = await fetch("https://portal.umoja.network/api/2.0/admin/customers/customer-documents", {
+            method: "POST",
+            headers: { "Authorization": authHeader, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              customer_id: customerId, type: "uploaded", title: item.title,
+              description: item.description, visible_by_customer: "0"
+            })
+          });
+          if (!createRes.ok) throw new Error(`Failed to create ${item.title}`);
+          const createdDoc = await createRes.json();
+          const docId = createdDoc.id;
+
+          const formData = new FormData();
+          formData.append("file", item.file);
+          const uploadRes = await fetch(`https://portal.umoja.network/api/2.0/admin/customers/customer-documents/${docId}--upload`, {
+            method: "POST", headers: { "Authorization": authHeader }, body: formData
+          });
+          if (!uploadRes.ok) throw new Error(`Failed to upload ${item.title}`);
+        }
+
+        const sheetFormData = new FormData();
+        sheetFormData.append('Customer ID', selectedCustomer.id);
+        sheetFormData.append('Name', selectedCustomer.name); 
+        sheetFormData.append('Router Barcode', allDOMElements.routerInput.value);
+        sheetFormData.append('SIM Barcode', allDOMElements.simInput.value);
+        sheetFormData.append('Agent', allDOMElements.agentNameInput.value);
+
+        const sheetUrl = 'https://script.google.com/macros/s/AKfycbzC9F_ZeIWsPmMLsIFOm5NIrUZSS-JvBjIoB5tJEc-1T-pptFcjHC_KnPTmoJ_IvyOE2g/exec'; // <-- IMPORTANT: Remember to paste your script URL
+        
+        const sheetResponse = await fetch(sheetUrl, {
+            method: 'POST',
+            body: sheetFormData,
+        });
+        
+        const sheetResult = await sheetResponse.json();
+        if (sheetResult.result !== 'success') {
+            console.error('Error sending to sheet:', sheetResult.error);
+            throw new Error('Data was uploaded, but failed to send to Google Sheet.');
+        }
+
+        alert("✅ Delivery confirmed and all data saved successfully!");
+        allDOMElements.backToSearchLink.click();
+        
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error: " + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Confirm Delivery";
+      }
+    }
+
+    // --- EVENT LISTENERS ---
+    allDOMElements.searchBar.addEventListener("input", e => {
+      const query = e.target.value.toLowerCase();
+      const filtered = allCustomers.filter(c => 
+        (c.name && c.name.toLowerCase().includes(query)) ||
+        (c.id && c.id.toLowerCase().includes(query))
+      );
+      displayFilteredCustomers(filtered);
+    });
+
+    allDOMElements.backToSearchLink.addEventListener("click", e => {
+      e.preventDefault();
+      allDOMElements.assignmentView.style.display = 'none';
+      allDOMElements.searchView.style.display = 'block';
+      document.getElementById('router-input').value = '';
+      document.getElementById('sim-input').value = '';
+      document.getElementById('id-photo-input').value = '';
+      document.getElementById('premises-photo-input').value = '';
+      document.getElementById('id-photo-preview').classList.remove('has-image');
+      document.getElementById('premises-photo-preview').classList.remove('has-image');
+      if(signaturePad) signaturePad.clear();
+    });
+
+    allDOMElements.clearSignatureBtn.addEventListener("click", () => signaturePad.clear());
+    allDOMElements.submitBtn.addEventListener("click", submitDelivery);
+    allDOMElements.cancelScanBtn.addEventListener("click", stopScanner);
+
+    document.querySelectorAll(".scan-button").forEach(btn => 
+      btn.addEventListener("click", () => startScanner(btn.dataset.target))
+    );
+    document.querySelectorAll(".photo-button").forEach(btn => 
+      btn.addEventListener("click", () => document.getElementById(btn.dataset.target).click())
+    );
+    document.querySelectorAll("input[type='file']").forEach(input => {
+      input.addEventListener("change", e => {
+        const previewId = e.target.id.replace("-input", "-preview");
+        const img = document.getElementById(previewId);
+        if (e.target.files[0]) {
+          img.src = URL.createObjectURL(e.target.files[0]);
+          img.classList.add("has-image");
+        }
+      });
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+    loadCustomers();
+  </script>
+</body>
+</html>
