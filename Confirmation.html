@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delivery Confirmation</title>
+  <title>Device Assignment</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -120,53 +120,6 @@
     }
     .submit-button:hover { background-color: #c4005f; }
     .submit-button:disabled { background-color: #cccccc; cursor: not-allowed; }
-    
-    /* AUTH & HISTORY Styles */
-    .logout-link {
-        display: block; text-align: center; margin-top: 20px;
-        color: #6c757d; font-size: 14px; text-decoration: none;
-    }
-    .logout-link:hover { text-decoration: underline; }
-    
-    .history-button {
-      width: 100%; margin-top: 15px; background: #6c757d;
-      color: white; border: none; padding: 10px; border-radius: 8px;
-      font-size: 15px; cursor: pointer;
-    }
-    .history-button:hover { background: #5a6268; }
-
-    .modal {
-        display: none; position: fixed; z-index: 2000; 
-        left: 0; top: 0; width: 100%; height: 100%; 
-        overflow: auto; background-color: rgba(0,0,0,0.5);
-    }
-    .modal-content {
-        background-color: #fefefe; margin: 5% auto; padding: 20px;
-        border: 1px solid #888; width: 90%; max-width: 800px;
-        border-radius: 10px;
-    }
-    .close-button {
-        color: #aaa; float: right; font-size: 28px;
-        font-weight: bold; cursor: pointer;
-    }
-    .close-button:hover, .close-button:focus {
-        color: black; text-decoration: none;
-    }
-    #history-table-container { max-height: 60vh; overflow-y: auto; }
-    #history-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    #history-table th, #history-table td {
-        border: 1px solid #ddd; padding: 8px; text-align: left;
-        font-size: 14px; word-break: break-word;
-    }
-    #history-table th { background-color: #f2f2f2; position: sticky; top: 0; }
-
-    @media (max-width: 600px) {
-      body { padding: 20px 15px; }
-      .container { padding: 25px 20px; }
-      h1 { font-size: 1.8rem; }
-      .modal-content { width: 95%; margin: 10% auto; padding: 15px; }
-      #history-table th, #history-table td { font-size: 12px; padding: 6px; }
-    }
   </style>
 </head>
 <body>
@@ -177,14 +130,15 @@
       <p class="subtitle">Search customer by name or customer ID</p>
       <div class="search-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001
+                   c.03.04.062.078.098.115l3.85 3.85a1 1 0 0
+                   0 1.415-1.414l-3.85-3.85a1.007 1.007
+                   0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1
+                   1-11 0 5.5 5.5 0 0 1 11 0z"/>
         </svg>
         <input type="text" id="searchBar" placeholder="Search...">
       </div>
       <div id="customerList"></div>
-      
-      <button id="viewHistoryBtn" class="history-button">View My Delivery History</button>
-      <a href="#" id="logout-link-search" class="logout-link">Logout</a>
     </div>
 
     <!-- Assignment View -->
@@ -237,7 +191,6 @@
 
       <button id="submit-button" class="submit-button">Confirm Delivery</button>
       <a href="#" id="backToSearch">Search for another customer</a>
-      <a href="#" id="logout-link-assign" class="logout-link">Logout</a>
     </div>
   </div>
 
@@ -248,50 +201,25 @@
     </div>
   </div>
 
-  <!-- History Modal -->
-  <div id="historyModal" class="modal">
-    <div class="modal-content">
-      <span class="close-button">&times;</span>
-      <h2>My Delivery History</h2>
-      <div id="history-table-container">
-        <table id="history-table">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Customer</th>
-              <th>Router</th>
-              <th>SIM</th>
-            </tr>
-          </thead>
-          <tbody id="history-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // --- AUTHENTICATION & LOGOUT ---
-    const loggedInUserData = localStorage.getItem('loggedInUser');
-    let loggedInUser = null;
-
-    function handleLogout() {
-        localStorage.removeItem('loggedInUser');
-        window.location.href = 'login.html';
-    }
-    
+    // --- NEW: AUTHENTICATION CHECK ---
+    // This part runs as soon as the page loads
     window.addEventListener('DOMContentLoaded', () => {
+        const loggedInUserData = localStorage.getItem('loggedInUser');
+        
         if (!loggedInUserData) {
-            window.location.href = 'login.html';
+            // If no user data is found, redirect to login page
+            window.location.href = 'login.html'; // Make sure your login page is named login.html
         } else {
-            loggedInUser = JSON.parse(loggedInUserData);
+            // If user data is found, parse it
+            const loggedInUser = JSON.parse(loggedInUserData);
+            
+            // Automatically fill the Agent Name input field
             const agentNameInput = document.getElementById('agent-name-input');
             if (agentNameInput && loggedInUser.fullName) {
                 agentNameInput.value = loggedInUser.fullName;
             }
         }
-        document.getElementById('logout-link-search').addEventListener('click', handleLogout);
-        document.getElementById('logout-link-assign').addEventListener('click', handleLogout);
-        document.getElementById('viewHistoryBtn').addEventListener('click', showDeliveryHistory);
     });
 
     const allDOMElements = {
@@ -319,74 +247,21 @@
     let signaturePad;
     let currentScanTargetId = null;
 
-    // --- DELIVERY HISTORY FUNCTIONALITY ---
-    const historyModal = document.getElementById('historyModal');
-    const closeBtn = document.querySelector('.modal .close-button');
-    closeBtn.onclick = () => { historyModal.style.display = 'none'; };
-    window.onclick = (event) => {
-        if (event.target == historyModal) {
-            historyModal.style.display = 'none';
-        }
-    };
-
-    async function showDeliveryHistory() {
-        if (!loggedInUser) {
-            alert('Could not identify agent.');
-            return;
-        }
-
-        const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRKPA6yfqgouD1JkUY-LwtTDMpNXxQb8s9KpuRyCpEbPVv1dZXnoUjaiWYi5rWXjz_0U_HcfPo72P8Q/pub?gid=2140533495&single=true&output=csv';
-        
-        // *** THIS IS THE FIX ***
-        // Appending a timestamp forces the browser to fetch a fresh copy.
-        const urlWithCacheBust = `${baseUrl}&t=${new Date().getTime()}`;
-
-        const tableBody = document.getElementById('history-table-body');
-        tableBody.innerHTML = '<tr><td colspan="4">Loading history...</td></tr>';
-        historyModal.style.display = 'block';
-
-        try {
-            // Use the new URL with the cache buster
-            const response = await fetch(urlWithCacheBust);
-            if (!response.ok) throw new Error('Network response was not ok.');
-            const csvText = await response.text();
-            
-            const rows = csvText.split(/\r?\n/).slice(1);
-            const agentName = loggedInUser.fullName;
-            let historyHtml = '';
-
-            rows.reverse().forEach(rowText => {
-                if (!rowText) return;
-                const columns = rowText.split(',');
-                const rowAgent = (columns[5] || '').trim();
-
-                if (rowAgent === agentName) {
-                    const time = (columns[0] || '').trim();
-                    const customerName = (columns[2] || '').trim();
-                    const routerBarcode = (columns[3] || '').trim();
-                    const simBarcode = (columns[4] || '').trim();
-                    historyHtml += `<tr><td>${time}</td><td>${customerName}</td><td>${routerBarcode}</td><td>${simBarcode}</td></tr>`;
-                }
-            });
-
-            tableBody.innerHTML = historyHtml || '<tr><td colspan="4">No delivery history found for you.</td></tr>';
-        } catch (error) {
-            console.error('Error fetching delivery history:', error);
-            tableBody.innerHTML = '<tr><td colspan="4">Failed to load history.</td></tr>';
-        }
-    }
-
     // --- QR SCANNER ---
     const html5QrCode = new Html5Qrcode("qr-reader");
     const onScanSuccess = (decodedText) => {
-      if (currentScanTargetId) document.getElementById(currentScanTargetId).value = decodedText;
+      if (currentScanTargetId)
+        document.getElementById(currentScanTargetId).value = decodedText;
       stopScanner();
     };
     function startScanner(targetInputId) {
       currentScanTargetId = targetInputId;
       allDOMElements.scannerContainer.style.display = 'flex';
-      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, () => {})
-        .catch(() => { alert("Could not start scanner"); stopScanner(); });
+      html5QrCode.start({ facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess,
+        () => {}
+      ).catch(() => { alert("Could not start scanner"); stopScanner(); });
     }
     function stopScanner() {
       html5QrCode.stop().catch(()=>{}).finally(()=>{
@@ -429,7 +304,8 @@
       filtered.forEach(c => {
         const div = document.createElement('div');
         div.className = "customer-card";
-        div.innerHTML = `<div class="customer-name">${c.name || "Unknown"}</div><div class="customer-details">Customer ID: ${c.id || "N/A"}</div>`;
+        div.innerHTML = `<div class="customer-name">${c.name || "Unknown"}</div>
+                         <div class="customer-details">Customer ID: ${c.id || "N/A"}</div>`;
         div.onclick = () => selectCustomerHandler(c);
         allDOMElements.customerList.appendChild(div);
       });
@@ -437,10 +313,13 @@
 
     function selectCustomerHandler(customer) {
       selectedCustomer = customer;
-      allDOMElements.selectedCustomerInfo.innerHTML = `<div>Name: <span>${customer.name}</span></div><div>Customer ID: <span>${customer.id}</span></div>`;
+      allDOMElements.selectedCustomerInfo.innerHTML = `
+        <div>Name: <span>${customer.name}</span></div>
+        <div>Customer ID: <span>${customer.id}</span></div>`;
       allDOMElements.searchView.style.display = 'none';
       allDOMElements.assignmentView.style.display = 'block';
-      if (!signaturePad) signaturePad = new SignaturePad(allDOMElements.signatureCanvas, { backgroundColor: 'white' });
+      if (!signaturePad)
+        signaturePad = new SignaturePad(allDOMElements.signatureCanvas, { backgroundColor: 'white' });
       resizeCanvas();
     }
 
@@ -468,29 +347,42 @@
       submitBtn.textContent = "Submitting...";
 
       try {
-        // 1. UPLOAD FILES TO PORTAL
         const idPhotoFile = allDOMElements.idPhotoInput.files[0];
         const premisesPhotoFile = allDOMElements.premisesPhotoInput.files[0];
         const signatureFile = dataURLtoFile(signaturePad.toDataURL('image/png'), 'signature.png');
-        
-        const authHeader = "Basic MWY3M2M4ODUzY2FiYzg3ZTI0MjIyOWE5NDU1NDg4MDE6MWU2MTM4NzAwMjA0MjlmNjM3NzRjYmYwZjU5ZGIxMTY=";
+
         const filesToUpload = [
           { file: idPhotoFile, title: "ID Copy", description: "Customer ID Copy" },
           { file: premisesPhotoFile, title: "Customer Premises Photo", description: "Photo of installation site" },
           { file: signatureFile, title: "Signature", description: "Customer Signature" }
         ];
+
+        const authHeader = "Basic MWY3M2M4ODUzY2FiYzg3ZTI0MjIyOWE5NDU1NDg4MDE6MWU2MTM4NzAwMjA0MjlmNjM3NzRjYmYwZjU5ZGIxMTY=";
+        const customerId = selectedCustomer.id;
+
         for (const item of filesToUpload) {
           if (!item.file) continue;
-          const createRes = await fetch("https://portal.umoja.network/api/2.0/admin/customers/customer-documents", { method: "POST", headers: { "Authorization": authHeader, "Content-Type": "application/json" }, body: JSON.stringify({ customer_id: selectedCustomer.id, type: "uploaded", title: item.title, description: item.description, visible_by_customer: "0" }) });
+
+          const createRes = await fetch("https://portal.umoja.network/api/2.0/admin/customers/customer-documents", {
+            method: "POST",
+            headers: { "Authorization": authHeader, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              customer_id: customerId, type: "uploaded", title: item.title,
+              description: item.description, visible_by_customer: "0"
+            })
+          });
           if (!createRes.ok) throw new Error(`Failed to create ${item.title}`);
           const createdDoc = await createRes.json();
+          const docId = createdDoc.id;
+
           const formData = new FormData();
           formData.append("file", item.file);
-          const uploadRes = await fetch(`https://portal.umoja.network/api/2.0/admin/customers/customer-documents/${createdDoc.id}--upload`, { method: "POST", headers: { "Authorization": authHeader }, body: formData });
+          const uploadRes = await fetch(`https://portal.umoja.network/api/2.0/admin/customers/customer-documents/${docId}--upload`, {
+            method: "POST", headers: { "Authorization": authHeader }, body: formData
+          });
           if (!uploadRes.ok) throw new Error(`Failed to upload ${item.title}`);
         }
-        
-        // 2. SEND DATA TO GOOGLE SHEET
+
         const sheetFormData = new FormData();
         sheetFormData.append('Customer ID', selectedCustomer.id);
         sheetFormData.append('Name', selectedCustomer.name); 
@@ -498,13 +390,17 @@
         sheetFormData.append('SIM Barcode', allDOMElements.simInput.value);
         sheetFormData.append('Agent', allDOMElements.agentNameInput.value);
 
-        const sheetUrl = 'https://script.google.com/macros/s/AKfycbzC9F_ZeIWsPmMLsIFOm5NIrUZSS-JvBjIoB5tJEc-1T-pptFcjHC_KnPTmoJ_IvyOE2g/exec';
+        const sheetUrl = 'https://script.google.com/macros/s/AKfycbzC9F_ZeIWsPmMLsIFOm5NIrUZSS-JvBjIoB5tJEc-1T-pptFcjHC_KnPTmoJ_IvyOE2g/exec'; // <-- IMPORTANT: Remember to paste your script URL
         
-        const sheetResponse = await fetch(sheetUrl, { method: 'POST', body: sheetFormData });
+        const sheetResponse = await fetch(sheetUrl, {
+            method: 'POST',
+            body: sheetFormData,
+        });
+        
         const sheetResult = await sheetResponse.json();
         if (sheetResult.result !== 'success') {
             console.error('Error sending to sheet:', sheetResult.error);
-            throw new Error('Data uploaded to portal, but failed to save to Google Sheet.');
+            throw new Error('Data was uploaded, but failed to send to Google Sheet.');
         }
 
         alert("✅ Delivery confirmed and all data saved successfully!");
@@ -568,5 +464,3 @@
   </script>
 </body>
 </html>
-
-
