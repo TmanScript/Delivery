@@ -1,796 +1,1401 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delivery Confirmation</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-  <style>
-    :root {
-      --primary: #e80074;
-      --primary-dark: #c4005f;
-      --primary-glow: rgba(232, 0, 116, 0.15);
-      --border: #e8e8e8;
-      --bg: #f4f4f6;
-      --card: #ffffff;
-      --text: #1a1a1a;
-      --muted: #777;
-      --success: #00b86b;
-      --danger: #e84040;
-      --radius: 12px;
-      --shadow: 0 2px 16px rgba(0,0,0,0.07);
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delivery Confirmation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://unpkg.com/html5-qrcode"
+      type="text/javascript"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <style>
+      :root {
+        --primary: #e80074;
+        --primary-dark: #c4005f;
+        --primary-glow: rgba(232, 0, 116, 0.15);
+        --border: #e8e8e8;
+        --bg: #f4f4f6;
+        --card: #ffffff;
+        --text: #1a1a1a;
+        --muted: #777;
+        --success: #00b86b;
+        --danger: #e84040;
+        --radius: 12px;
+        --shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+      }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background-color: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 40px 16px 60px;
-      color: var(--text);
-    }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background-color: var(--bg);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 16px 60px;
+        color: var(--text);
+      }
 
-    .container {
-      width: 100%;
-      max-width: 520px;
-    }
+      .container {
+        width: 100%;
+        max-width: 520px;
+      }
 
-    /* ── HEADER ── */
-    .app-header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .app-header .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-    .app-header .logo-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--primary);
-      display: inline-block;
-    }
-    .app-header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: var(--text);
-    }
-    .app-header p {
-      font-size: 0.875rem;
-      color: var(--muted);
-    }
+      /* ── HEADER ── */
+      .app-header {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+      .app-header .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+      .app-header .logo-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+        display: inline-block;
+      }
+      .app-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--text);
+      }
+      .app-header p {
+        font-size: 0.875rem;
+        color: var(--muted);
+      }
 
-    /* ── CARD ── */
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 28px;
-      margin-bottom: 16px;
-    }
+      /* ── CARD ── */
+      .card {
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px;
+        margin-bottom: 16px;
+      }
 
-    /* ── SEARCH ── */
-    .search-wrapper {
-      position: relative;
-    }
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
-    }
-    #searchBar {
-      width: 100%;
-      padding: 13px 14px 13px 42px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      color: var(--text);
-      background: #fafafa;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-    }
-    #searchBar:focus {
-      outline: none;
-      border-color: var(--primary);
-      background: #fff;
-      box-shadow: 0 0 0 3px var(--primary-glow);
-    }
-    #searchBar::placeholder { color: #bbb; }
+      /* ── SEARCH ── */
+      .search-wrapper {
+        position: relative;
+      }
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        pointer-events: none;
+      }
+      #searchBar {
+        width: 100%;
+        padding: 13px 14px 13px 42px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        color: var(--text);
+        background: #fafafa;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          background 0.2s;
+      }
+      #searchBar:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: #fff;
+        box-shadow: 0 0 0 3px var(--primary-glow);
+      }
+      #searchBar::placeholder {
+        color: #bbb;
+      }
 
-    /* ── CUSTOMER LIST ── */
-    #customerList {
-      margin-top: 16px;
-      max-height: 420px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    #customerList::-webkit-scrollbar { width: 4px; }
-    #customerList::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+      /* ── CUSTOMER LIST ── */
+      #customerList {
+        margin-top: 16px;
+        max-height: 420px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      #customerList::-webkit-scrollbar {
+        width: 4px;
+      }
+      #customerList::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 4px;
+      }
 
-    .customer-card {
-      padding: 14px 16px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s, transform 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .customer-card:hover {
-      border-color: var(--primary);
-      background: #fff8fb;
-      transform: translateX(2px);
-    }
-    .customer-card:active { transform: scale(0.99); }
-    .customer-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
-    .customer-id {
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .customer-arrow { color: var(--primary); opacity: 0.5; }
+      .customer-card {
+        padding: 14px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s,
+          transform 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .customer-card:hover {
+        border-color: var(--primary);
+        background: #fff8fb;
+        transform: translateX(2px);
+      }
+      .customer-card:active {
+        transform: scale(0.99);
+      }
+      .customer-name {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 2px;
+      }
+      .customer-id {
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .customer-arrow {
+        color: var(--primary);
+        opacity: 0.5;
+      }
 
-    .no-results {
-      text-align: center;
-      color: var(--muted);
-      font-size: 14px;
-      padding: 24px 0;
-    }
+      .no-results {
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+        padding: 24px 0;
+      }
+      .loading-state {
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+        padding: 24px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
 
-    .loading-state {
-      text-align: center;
-      color: var(--muted);
-      font-size: 14px;
-      padding: 24px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
+      /* ── SPINNER ── */
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: inline-block;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-    /* ── SPINNER ── */
-    .spinner {
-      width: 16px; height: 16px;
-      border: 2px solid var(--border);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: inline-block;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+      /* ── SECTION LABELS ── */
+      .section-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
 
-    /* ── SECTION LABELS ── */
-    .section-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
+      /* ── CUSTOMER BANNER ── */
+      .customer-banner {
+        background: linear-gradient(135deg, #fff0f7 0%, #fff8fb 100%);
+        border: 1.5px solid #f9c0da;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .customer-banner-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .customer-banner-name {
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .customer-banner-id {
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+      }
 
-    /* ── SELECTED CUSTOMER BANNER ── */
-    .customer-banner {
-      background: linear-gradient(135deg, #fff0f7 0%, #fff8fb 100%);
-      border: 1.5px solid #f9c0da;
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .customer-banner-avatar {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: white;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 16px;
-      flex-shrink: 0;
-    }
-    .customer-banner-name { font-weight: 600; font-size: 15px; }
-    .customer-banner-id {
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: var(--muted);
-    }
+      /* ── COLLECTOR TOGGLE ── */
+      .collector-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .collector-btn {
+        padding: 14px 10px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: #fafafa;
+        cursor: pointer;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        text-align: center;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .collector-btn svg {
+        opacity: 0.5;
+        transition: opacity 0.2s;
+      }
+      .collector-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: #fff8fb;
+      }
+      .collector-btn:hover svg {
+        opacity: 1;
+      }
+      .collector-btn.active {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, #fff0f7 0%, #fff8fb 100%);
+        color: var(--primary);
+        font-weight: 600;
+      }
+      .collector-btn.active svg {
+        opacity: 1;
+      }
+      .collector-btn-label {
+        font-size: 12px;
+        line-height: 1.3;
+      }
 
-    /* ── FORM FIELDS ── */
-    .field-group { margin-bottom: 18px; }
-    .field-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 8px;
-      display: block;
-    }
-    .field-input {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      color: var(--text);
-      background: #fafafa;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .field-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      background: #fff;
-      box-shadow: 0 0 0 3px var(--primary-glow);
-    }
-    .field-input[readonly] {
-      background: #f0f0f0;
-      color: var(--muted);
-      cursor: default;
-    }
+      /* ── THIRD PARTY PANEL ── */
+      #thirdPartyPanel {
+        display: none;
+        background: #fff8fb;
+        border: 1.5px solid #f9c0da;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 18px;
+        animation: slideDown 0.25s ease;
+      }
+      #thirdPartyPanel.visible {
+        display: block;
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    /* ── SCAN / PHOTO BUTTONS ── */
-    .action-btn {
-      width: 100%;
-      padding: 11px 14px;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-      margin-bottom: 8px;
-    }
-    .scan-btn {
-      border: 1.5px dashed var(--border);
-      background: #fafafa;
-      color: var(--muted);
-    }
-    .scan-btn:hover { border-color: var(--primary); color: var(--primary); background: #fff8fb; }
+      .third-party-header {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-    .photo-btn {
-      border: 1.5px solid var(--border);
-      background: #fafafa;
-      color: var(--text);
-    }
-    .photo-btn:hover { border-color: var(--primary); background: #fff8fb; }
+      /* ── FORM FIELDS ── */
+      .field-group {
+        margin-bottom: 18px;
+      }
+      .field-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+        display: block;
+      }
+      .field-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        color: var(--text);
+        background: #fafafa;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .field-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: #fff;
+        box-shadow: 0 0 0 3px var(--primary-glow);
+      }
+      .field-input[readonly] {
+        background: #f0f0f0;
+        color: var(--muted);
+        cursor: default;
+      }
 
-    .photo-preview {
-      width: 100%;
-      border-radius: 10px;
-      object-fit: cover;
-      border: 1.5px solid var(--border);
-      display: none;
-      margin-top: 8px;
-      max-height: 200px;
-    }
-    .photo-preview.has-image { display: block; }
-    .hidden-file-input { display: none; }
+      /* ── SCAN / PHOTO BUTTONS ── */
+      .action-btn {
+        width: 100%;
+        padding: 11px 14px;
+        border-radius: 10px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+        margin-bottom: 8px;
+      }
+      .scan-btn {
+        border: 1.5px dashed var(--border);
+        background: #fafafa;
+        color: var(--muted);
+      }
+      .scan-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: #fff8fb;
+      }
+      .photo-btn {
+        border: 1.5px solid var(--border);
+        background: #fafafa;
+        color: var(--text);
+      }
+      .photo-btn:hover {
+        border-color: var(--primary);
+        background: #fff8fb;
+      }
+      .upload-btn {
+        border: 1.5px solid var(--border);
+        background: #fafafa;
+        color: var(--text);
+      }
+      .upload-btn:hover {
+        border-color: var(--primary);
+        background: #fff8fb;
+      }
 
-    /* ── SIGNATURE ── */
-    .sig-wrapper {
-      position: relative;
-      width: 100%;
-      height: 180px;
-      border: 1.5px dashed var(--border);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      background: #fafafa;
-      overflow: hidden;
-    }
-    .sig-placeholder {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 13px;
-      color: #ccc;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-    #signature-canvas {
-      position: absolute; left: 0; top: 0;
-      width: 100%; height: 100%;
-      cursor: crosshair;
-    }
-    .clear-sig-btn {
-      width: 100%;
-      padding: 10px;
-      background: #f4f4f6;
-      color: var(--muted);
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .clear-sig-btn:hover { background: #ebebeb; }
+      .photo-preview {
+        width: 100%;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1.5px solid var(--border);
+        display: none;
+        margin-top: 8px;
+        max-height: 200px;
+      }
+      .photo-preview.has-image {
+        display: block;
+      }
+      .hidden-file-input {
+        display: none;
+      }
 
-    /* ── SUBMIT BUTTON ── */
-    .submit-btn {
-      width: 100%;
-      padding: 16px;
-      margin-top: 8px;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 14px rgba(232,0,116,0.3);
-    }
-    .submit-btn:hover { background: var(--primary-dark); box-shadow: 0 6px 20px rgba(232,0,116,0.4); }
-    .submit-btn:active { transform: scale(0.99); }
-    .submit-btn:disabled {
-      background: #ddd;
-      color: #aaa;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+      /* ── SIGNATURE ── */
+      .sig-wrapper {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        border: 1.5px dashed var(--border);
+        border-radius: 10px;
+        margin-bottom: 8px;
+        background: #fafafa;
+        overflow: hidden;
+      }
+      .sig-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 13px;
+        color: #ccc;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      #signature-canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        cursor: crosshair;
+      }
+      .clear-sig-btn {
+        width: 100%;
+        padding: 10px;
+        background: #f4f4f6;
+        color: var(--muted);
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .clear-sig-btn:hover {
+        background: #ebebeb;
+      }
 
-    /* ── SECONDARY LINKS ── */
-    .text-link {
-      display: block;
-      text-align: center;
-      margin-top: 16px;
-      font-size: 14px;
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .text-link:hover { text-decoration: underline; }
-    .logout-link {
-      display: block;
-      text-align: center;
-      margin-top: 10px;
-      font-size: 13px;
-      color: var(--muted);
-      text-decoration: none;
-    }
-    .logout-link:hover { text-decoration: underline; }
+      /* ── SUBMIT BUTTON ── */
+      .submit-btn {
+        width: 100%;
+        padding: 16px;
+        margin-top: 8px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.15s,
+          box-shadow 0.2s;
+        box-shadow: 0 4px 14px rgba(232, 0, 116, 0.3);
+      }
+      .submit-btn:hover {
+        background: var(--primary-dark);
+        box-shadow: 0 6px 20px rgba(232, 0, 116, 0.4);
+      }
+      .submit-btn:active {
+        transform: scale(0.99);
+      }
+      .submit-btn:disabled {
+        background: #ddd;
+        color: #aaa;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
 
-    /* ── HISTORY BUTTON ── */
-    .history-btn {
-      width: 100%;
-      padding: 11px;
-      margin-top: 12px;
-      background: #f4f4f6;
-      color: var(--text);
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: all 0.2s;
-    }
-    .history-btn:hover { background: #ebebeb; border-color: #ccc; }
+      /* ── LINKS ── */
+      .text-link {
+        display: block;
+        text-align: center;
+        margin-top: 16px;
+        font-size: 14px;
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .text-link:hover {
+        text-decoration: underline;
+      }
+      .logout-link {
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .logout-link:hover {
+        text-decoration: underline;
+      }
 
-    /* ── SCANNER OVERLAY ── */
-    #scanner-container {
-      display: none;
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.75);
-      z-index: 1000;
-      justify-content: center; align-items: center;
-    }
-    .scanner-box {
-      width: 90%; max-width: 400px;
-      background: white;
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
-    #qr-reader { width: 100%; border-radius: 8px; overflow: hidden; }
-    .cancel-scan-btn {
-      width: 100%; padding: 12px; margin-top: 12px;
-      background: var(--danger);
-      color: white; border: none; border-radius: 8px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px; font-weight: 500;
-      cursor: pointer;
-    }
+      /* ── HISTORY BUTTON ── */
+      .history-btn {
+        width: 100%;
+        padding: 11px;
+        margin-top: 12px;
+        background: #f4f4f6;
+        color: var(--text);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+      }
+      .history-btn:hover {
+        background: #ebebeb;
+        border-color: #ccc;
+      }
 
-    /* ── MODAL ── */
-    .modal {
-      display: none;
-      position: fixed; z-index: 2000;
-      left: 0; top: 0; width: 100%; height: 100%;
-      overflow: auto;
-      background: rgba(0,0,0,0.5);
-    }
-    .modal-content {
-      background: white;
-      margin: 5% auto;
-      padding: 24px;
-      border-radius: var(--radius);
-      width: 90%; max-width: 800px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    }
-    .modal-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .modal-header h2 { font-size: 18px; font-weight: 700; }
-    .close-btn {
-      background: none; border: none;
-      font-size: 24px; cursor: pointer; color: var(--muted);
-      line-height: 1;
-    }
-    .close-btn:hover { color: var(--text); }
-    #history-table-container { max-height: 60vh; overflow-y: auto; }
-    #history-table {
-      width: 100%; border-collapse: collapse; margin-top: 8px;
-      font-size: 13px;
-    }
-    #history-table th {
-      background: #f4f4f6;
-      padding: 10px 12px;
-      text-align: left;
-      font-weight: 600;
-      position: sticky; top: 0;
-      border-bottom: 1px solid var(--border);
-    }
-    #history-table td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border);
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      word-break: break-word;
-    }
-    #history-table tr:last-child td { border-bottom: none; }
-    #history-table tr:hover td { background: #fafafa; }
+      /* ── SCANNER OVERLAY ── */
+      #scanner-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+      .scanner-box {
+        width: 90%;
+        max-width: 400px;
+        background: white;
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+      #qr-reader {
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .cancel-scan-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 12px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+      }
 
-    /* ── VIEWS ── */
-    #assignmentView { display: none; }
+      /* ── MODAL ── */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .modal-content {
+        background: white;
+        margin: 5% auto;
+        padding: 24px;
+        border-radius: var(--radius);
+        width: 90%;
+        max-width: 800px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .modal-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--muted);
+        line-height: 1;
+      }
+      .close-btn:hover {
+        color: var(--text);
+      }
+      #history-table-container {
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+      #history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-size: 13px;
+      }
+      #history-table th {
+        background: #f4f4f6;
+        padding: 10px 12px;
+        text-align: left;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      #history-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        word-break: break-word;
+      }
+      #history-table tr:last-child td {
+        border-bottom: none;
+      }
+      #history-table tr:hover td {
+        background: #fafafa;
+      }
 
-    /* ── DIVIDER ── */
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 20px 0;
-    }
+      /* ── VIEWS ── */
+      #assignmentView {
+        display: none;
+      }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 480px) {
-      body { padding: 20px 12px 50px; }
-      .card { padding: 20px; }
-      .modal-content { padding: 16px; }
-    }
-  </style>
-</head>
-<body>
-<div class="container">
+      /* ── DIVIDER ── */
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+      }
 
-  <!-- ══════════════ SEARCH VIEW ══════════════ -->
-  <div id="searchView">
-    <div class="app-header">
-      <div class="brand">
-        <span class="logo-dot"></span>
-        <h1>Delivery Confirmation</h1>
+      /* ── RESPONSIVE ── */
+      @media (max-width: 480px) {
+        body {
+          padding: 20px 12px 50px;
+        }
+        .card {
+          padding: 20px;
+        }
+        .modal-content {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- ══════════════ SEARCH VIEW ══════════════ -->
+      <div id="searchView">
+        <div class="app-header">
+          <div class="brand">
+            <span class="logo-dot"></span>
+            <h1>Delivery Confirmation</h1>
+          </div>
+          <p>Search customer by name or ID</p>
+        </div>
+        <div class="card">
+          <div class="search-wrapper">
+            <svg
+              class="search-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              id="searchBar"
+              placeholder="Search name or customer ID..."
+            />
+          </div>
+          <div id="customerList">
+            <div class="loading-state">
+              <span class="spinner"></span> Loading customers...
+            </div>
+          </div>
+        </div>
+        <button id="viewHistoryBtn" class="history-btn">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            fill="currentColor"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"
+            />
+            <path
+              d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"
+            />
+          </svg>
+          View My Delivery History
+        </button>
+        <a href="#" id="logout-link-search" class="logout-link">Logout</a>
       </div>
-      <p>Search customer by name or ID</p>
+
+      <!-- ══════════════ ASSIGNMENT VIEW ══════════════ -->
+      <div id="assignmentView">
+        <div class="app-header">
+          <div class="brand">
+            <span class="logo-dot"></span>
+            <h1>Delivery Confirmation</h1>
+          </div>
+          <p>Assign devices and capture proof</p>
+        </div>
+
+        <div class="card">
+          <p class="section-label">Selected Customer</p>
+          <div id="selectedCustomerInfo"></div>
+
+          <hr class="divider" />
+
+          <!-- ── COLLECTOR TYPE ── -->
+          <p class="section-label">Who is collecting?</p>
+          <div class="collector-toggle">
+            <button
+              type="button"
+              class="collector-btn active"
+              id="btn-customer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"
+                />
+              </svg>
+              <span class="collector-btn-label">The Customer</span>
+            </button>
+            <button type="button" class="collector-btn" id="btn-thirdparty">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M13 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm-1 0a2 2 0 1 0-4 0 2 2 0 0 0 4 0z"
+                />
+                <path
+                  d="M7.598 12.967c.447-.364.985-.648 1.592-.844A4.5 4.5 0 0 0 6 11c-3.315 0-5 2-5 3s1 1 1 1h4.256c-.176-.389-.27-.82-.27-1.27a4.4 4.4 0 0 1 1.612-3.763zM1 7a3 3 0 1 1 6 0A3 3 0 0 1 1 7zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"
+                />
+              </svg>
+              <span class="collector-btn-label">Someone Else</span>
+            </button>
+          </div>
+
+          <!-- ── THIRD PARTY PANEL ── -->
+          <div id="thirdPartyPanel">
+            <div class="third-party-header">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="13"
+                height="13"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                />
+              </svg>
+              Collector Details
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Collector's Full Name</label>
+              <input
+                type="text"
+                id="collector-name-input"
+                class="field-input"
+                placeholder="Enter collector's name..."
+              />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Collector's ID Photo</label>
+              <button
+                type="button"
+                class="action-btn photo-btn"
+                data-target="collector-id-input"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="15"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"
+                  />
+                  <path
+                    d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"
+                  />
+                </svg>
+                Take Photo of Collector's ID
+              </button>
+              <img
+                id="collector-id-preview"
+                class="photo-preview"
+                alt="Collector ID"
+              />
+              <input
+                type="file"
+                id="collector-id-input"
+                class="hidden-file-input"
+                accept="image/*"
+                capture="environment"
+              />
+            </div>
+
+            <div class="field-group" style="margin-bottom: 0">
+              <label class="field-label">Collector's Portrait Photo</label>
+              <button
+                type="button"
+                class="action-btn photo-btn"
+                data-target="collector-portrait-input"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="15"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                  <path
+                    fill-rule="evenodd"
+                    d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
+                  />
+                </svg>
+                Take Portrait Photo of Collector
+              </button>
+              <img
+                id="collector-portrait-preview"
+                class="photo-preview"
+                alt="Collector Portrait"
+              />
+              <input
+                type="file"
+                id="collector-portrait-input"
+                class="hidden-file-input"
+                accept="image/*"
+                capture="user"
+              />
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <!-- Agent -->
+          <div class="field-group">
+            <label class="field-label">Agent Name</label>
+            <input
+              type="text"
+              id="agent-name-input"
+              class="field-input"
+              placeholder="Agent name..."
+              readonly
+            />
+          </div>
+
+          <!-- Router -->
+          <div class="field-group">
+            <label class="field-label">Router</label>
+            <button
+              type="button"
+              class="action-btn scan-btn"
+              data-target="router-input"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0v-3zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5zM.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5zM4 4h1v1H4V4zm2 0h1v1H6V4zm2 0h1v1H8V4zM4 6h1v1H4V6zm2 0h1v1H6V6zm2 0h1v1H8V6zM4 8h1v1H4V8zm2 0h1v1H6V8zm2 0h1v1H8V8z"
+                />
+              </svg>
+              Scan Router QR Code
+            </button>
+            <input
+              type="text"
+              id="router-input"
+              class="field-input"
+              placeholder="Or enter router barcode manually..."
+            />
+          </div>
+
+          <!-- SIM -->
+          <div class="field-group">
+            <label class="field-label">SIM Card</label>
+            <button
+              type="button"
+              class="action-btn scan-btn"
+              data-target="sim-input"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0v-3zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5zM.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5zM4 4h1v1H4V4zm2 0h1v1H6V4zm2 0h1v1H8V4zM4 6h1v1H4V6zm2 0h1v1H6V6zm2 0h1v1H8V6zM4 8h1v1H4V8zm2 0h1v1H6V8zm2 0h1v1H8V8z"
+                />
+              </svg>
+              Scan SIM QR Code
+            </button>
+            <input
+              type="text"
+              id="sim-input"
+              class="field-input"
+              placeholder="Or enter SIM barcode manually..."
+            />
+          </div>
+
+          <hr class="divider" />
+
+          <!-- ID Photo -->
+          <div id="customer-id-field" class="field-group">
+            <label class="field-label">Customer ID Photo</label>
+            <button
+              type="button"
+              class="action-btn photo-btn"
+              data-target="id-photo-input"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"
+                />
+                <path
+                  d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"
+                />
+              </svg>
+              Take Photo of Customer ID
+            </button>
+            <img id="id-photo-preview" class="photo-preview" alt="ID Photo" />
+            <input
+              type="file"
+              id="id-photo-input"
+              class="hidden-file-input"
+              accept="image/*"
+              capture="environment"
+            />
+          </div>
+
+          <!-- Premises Photo -->
+          <div class="field-group">
+            <label class="field-label">Customer Premises Photo</label>
+            <button
+              type="button"
+              class="action-btn photo-btn"
+              data-target="premises-photo-input"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"
+                />
+                <path
+                  d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"
+                />
+              </svg>
+              Take Photo of Premises
+            </button>
+            <img
+              id="premises-photo-preview"
+              class="photo-preview"
+              alt="Premises Photo"
+            />
+            <input
+              type="file"
+              id="premises-photo-input"
+              class="hidden-file-input"
+              accept="image/*"
+              capture="environment"
+            />
+          </div>
+
+          <!-- Proof of Residence -->
+          <div class="field-group">
+            <label class="field-label">Proof of Residence</label>
+            <button
+              type="button"
+              class="action-btn upload-btn"
+              data-target="por-input"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"
+                />
+                <path
+                  d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"
+                />
+              </svg>
+              Upload or Take Photo of Proof of Residence
+            </button>
+            <img
+              id="por-preview"
+              class="photo-preview"
+              alt="Proof of Residence"
+            />
+            <!-- Accept both camera and file uploads (no capture attr so user gets choice) -->
+            <input
+              type="file"
+              id="por-input"
+              class="hidden-file-input"
+              accept="image/*,application/pdf"
+            />
+            <div
+              id="por-file-name"
+              style="
+                font-size: 12px;
+                color: var(--muted);
+                margin-top: 6px;
+                font-family: &quot;DM Mono&quot;, monospace;
+                display: none;
+              "
+            ></div>
+          </div>
+
+          <hr class="divider" />
+
+          <!-- Signature -->
+          <div class="field-group">
+            <label class="field-label">Customer Signature</label>
+            <div class="sig-wrapper">
+              <span class="sig-placeholder" id="sig-placeholder"
+                >Sign here</span
+              >
+              <canvas id="signature-canvas"></canvas>
+            </div>
+            <button
+              type="button"
+              class="clear-sig-btn"
+              id="clear-signature-btn"
+            >
+              Clear Signature
+            </button>
+          </div>
+
+          <button id="submit-button" class="submit-btn">
+            Confirm Delivery
+          </button>
+        </div>
+
+        <a href="#" id="backToSearch" class="text-link"
+          >← Search for another customer</a
+        >
+        <a href="#" id="logout-link-assign" class="logout-link">Logout</a>
+      </div>
     </div>
 
-    <div class="card">
-      <div class="search-wrapper">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-        </svg>
-        <input type="text" id="searchBar" placeholder="Search name or customer ID...">
+    <!-- ══════════════ SCANNER OVERLAY ══════════════ -->
+    <div id="scanner-container">
+      <div class="scanner-box">
+        <div id="qr-reader"></div>
+        <button id="cancel-scan" class="cancel-scan-btn">Cancel</button>
       </div>
-      <div id="customerList">
-        <div class="loading-state">
-          <span class="spinner"></span> Loading customers...
+    </div>
+
+    <!-- ══════════════ HISTORY MODAL ══════════════ -->
+    <div id="historyModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>My Delivery History</h2>
+          <button class="close-btn" id="closeModalBtn">&times;</button>
+        </div>
+        <div id="history-table-container">
+          <table id="history-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Customer</th>
+                <th>Router</th>
+                <th>SIM</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <button id="viewHistoryBtn" class="history-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-      </svg>
-      View My Delivery History
-    </button>
-    <a href="#" id="logout-link-search" class="logout-link">Logout</a>
-  </div>
+    <script>
+      // ══════════════════════════════════════════
+      // CONFIG
+      // ══════════════════════════════════════════
+      const APPS_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbyjcTM-qpwKeGjw3ArLrsFkJS9E0zO10NuGuh9lIw8zorpD1Y8wju0sTS-J-j34ve2Nnw/exec";
+      const HISTORY_CSV_URL =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKPA6yfqgouD1JkUY-LwtTDMpNXxQb8s9KpuRyCpEbPVv1dZXnoUjaiWYi5rWXjz_0U_HcfPo72P8Q/pub?gid=2140533495&single=true&output=csv";
+      const PORTAL_AUTH =
+        "Basic MWY3M2M4ODUzY2FiYzg3ZTI0MjIyOWE5NDU1NDg4MDE6MWU2MTM4NzAwMjA0MjlmNjM3NzRjYmYwZjU5ZGIxMTY=";
 
-  <!-- ══════════════ ASSIGNMENT VIEW ══════════════ -->
-  <div id="assignmentView">
-    <div class="app-header">
-      <div class="brand">
-        <span class="logo-dot"></span>
-        <h1>Delivery Confirmation</h1>
-      </div>
-      <p>Assign devices and capture proof</p>
-    </div>
+      // ══════════════════════════════════════════
+      // STATE
+      // ══════════════════════════════════════════
+      let loggedInUser = null;
+      let allCustomers = [];
+      let selectedCustomer = null;
+      let signaturePad = null;
+      let currentScanTargetId = null;
+      let collectorIsThirdParty = false;
 
-    <div class="card">
-      <p class="section-label">Selected Customer</p>
-      <div id="selectedCustomerInfo"></div>
+      // ══════════════════════════════════════════
+      // DOM REFS
+      // ══════════════════════════════════════════
+      const dom = {
+        searchView: document.getElementById("searchView"),
+        assignmentView: document.getElementById("assignmentView"),
+        searchBar: document.getElementById("searchBar"),
+        customerList: document.getElementById("customerList"),
+        selectedCustomerInfo: document.getElementById("selectedCustomerInfo"),
+        backToSearchLink: document.getElementById("backToSearch"),
+        scannerContainer: document.getElementById("scanner-container"),
+        cancelScanBtn: document.getElementById("cancel-scan"),
+        signatureCanvas: document.getElementById("signature-canvas"),
+        clearSignatureBtn: document.getElementById("clear-signature-btn"),
+        submitBtn: document.getElementById("submit-button"),
+        idPhotoInput: document.getElementById("id-photo-input"),
+        premisesPhotoInput: document.getElementById("premises-photo-input"),
+        agentNameInput: document.getElementById("agent-name-input"),
+        routerInput: document.getElementById("router-input"),
+        simInput: document.getElementById("sim-input"),
+        sigPlaceholder: document.getElementById("sig-placeholder"),
+        historyModal: document.getElementById("historyModal"),
+        historyTableBody: document.getElementById("history-table-body"),
+        closeModalBtn: document.getElementById("closeModalBtn"),
+        viewHistoryBtn: document.getElementById("viewHistoryBtn"),
+        btnCustomer: document.getElementById("btn-customer"),
+        btnThirdParty: document.getElementById("btn-thirdparty"),
+        thirdPartyPanel: document.getElementById("thirdPartyPanel"),
+        collectorNameInput: document.getElementById("collector-name-input"),
+        collectorRelationship: null,
+        collectorIdInput: document.getElementById("collector-id-input"),
+        collectorPortraitInput: document.getElementById(
+          "collector-portrait-input",
+        ),
+        porInput: document.getElementById("por-input"),
+        porPreview: document.getElementById("por-preview"),
+        porFileName: document.getElementById("por-file-name"),
+        customerIdField: document.getElementById("customer-id-field"),
+      };
 
-      <hr class="divider">
+      // ══════════════════════════════════════════
+      // INIT
+      // ══════════════════════════════════════════
+      window.addEventListener("DOMContentLoaded", () => {
+        const stored = localStorage.getItem("loggedInUser");
+        if (!stored) {
+          window.location.href = "login.html";
+          return;
+        }
+        loggedInUser = JSON.parse(stored);
+        if (loggedInUser.fullName)
+          dom.agentNameInput.value = loggedInUser.fullName;
 
-      <!-- Agent -->
-      <div class="field-group">
-        <label class="field-label">Agent Name</label>
-        <input type="text" id="agent-name-input" class="field-input" placeholder="Agent name..." readonly>
-      </div>
+        document
+          .getElementById("logout-link-search")
+          .addEventListener("click", handleLogout);
+        document
+          .getElementById("logout-link-assign")
+          .addEventListener("click", handleLogout);
+        dom.viewHistoryBtn.addEventListener("click", showDeliveryHistory);
+        dom.closeModalBtn.addEventListener("click", () => {
+          dom.historyModal.style.display = "none";
+        });
+        window.addEventListener("click", (e) => {
+          if (e.target === dom.historyModal)
+            dom.historyModal.style.display = "none";
+        });
 
-      <!-- Router -->
-      <div class="field-group">
-        <label class="field-label">Router</label>
-        <button type="button" class="action-btn scan-btn" data-target="router-input">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0v-3zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5zM.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5zM4 4h1v1H4V4zm2 0h1v1H6V4zm2 0h1v1H8V4zM4 6h1v1H4V6zm2 0h1v1H6V6zm2 0h1v1H8V6zM4 8h1v1H4V8zm2 0h1v1H6V8zm2 0h1v1H8V8z"/>
-          </svg>
-          Scan Router QR Code
-        </button>
-        <input type="text" id="router-input" class="field-input" placeholder="Or enter router barcode manually...">
-      </div>
+        // Collector toggle
+        dom.btnCustomer.addEventListener("click", () =>
+          setCollectorType(false),
+        );
+        dom.btnThirdParty.addEventListener("click", () =>
+          setCollectorType(true),
+        );
 
-      <!-- SIM -->
-      <div class="field-group">
-        <label class="field-label">SIM Card</label>
-        <button type="button" class="action-btn scan-btn" data-target="sim-input">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0v-3zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5zM.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5zM4 4h1v1H4V4zm2 0h1v1H6V4zm2 0h1v1H8V4zM4 6h1v1H4V6zm2 0h1v1H6V6zm2 0h1v1H8V6zM4 8h1v1H4V8zm2 0h1v1H6V8zm2 0h1v1H8V8z"/>
-          </svg>
-          Scan SIM QR Code
-        </button>
-        <input type="text" id="sim-input" class="field-input" placeholder="Or enter SIM barcode manually...">
-      </div>
+        // Proof of residence — show filename for PDF, preview for image
+        dom.porInput.addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          if (file.type.startsWith("image/")) {
+            dom.porPreview.src = URL.createObjectURL(file);
+            dom.porPreview.classList.add("has-image");
+            dom.porFileName.style.display = "none";
+          } else {
+            dom.porPreview.classList.remove("has-image");
+            dom.porFileName.textContent = "📄 " + file.name;
+            dom.porFileName.style.display = "block";
+          }
+        });
 
-      <hr class="divider">
+        loadCustomers();
+      });
 
-      <!-- ID Photo -->
-      <div class="field-group">
-        <label class="field-label">ID Photo</label>
-        <button type="button" class="action-btn photo-btn" data-target="id-photo-input">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
-            <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-          </svg>
-          Take Photo of ID
-        </button>
-        <img id="id-photo-preview" class="photo-preview" alt="ID Photo">
-        <input type="file" id="id-photo-input" class="hidden-file-input" accept="image/*" capture="environment">
-      </div>
+      function handleLogout() {
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "login.html";
+      }
 
-      <!-- Premises Photo -->
-      <div class="field-group">
-        <label class="field-label">Customer Premises Photo</label>
-        <button type="button" class="action-btn photo-btn" data-target="premises-photo-input">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
-            <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-          </svg>
-          Take Photo of Premises
-        </button>
-        <img id="premises-photo-preview" class="photo-preview" alt="Premises Photo">
-        <input type="file" id="premises-photo-input" class="hidden-file-input" accept="image/*" capture="environment">
-      </div>
+      function setCollectorType(isThirdParty) {
+        collectorIsThirdParty = isThirdParty;
+        dom.btnCustomer.classList.toggle("active", !isThirdParty);
+        dom.btnThirdParty.classList.toggle("active", isThirdParty);
+        dom.thirdPartyPanel.classList.toggle("visible", isThirdParty);
+        // Hide customer ID photo when someone else is collecting
+        dom.customerIdField.style.display = isThirdParty ? "none" : "";
+        // Clear customer ID input/preview when hiding
+        if (isThirdParty) {
+          dom.idPhotoInput.value = "";
+          const preview = document.getElementById("id-photo-preview");
+          if (preview) preview.classList.remove("has-image");
+        }
+      }
 
-      <hr class="divider">
+      // ══════════════════════════════════════════
+      // LOAD CUSTOMERS
+      // ══════════════════════════════════════════
+      async function loadCustomers() {
+        dom.customerList.innerHTML =
+          '<div class="loading-state"><span class="spinner"></span> Loading customers...</div>';
+        try {
+          const res = await fetch(APPS_SCRIPT_URL);
+          if (!res.ok) throw new Error("Failed to load customers");
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          allCustomers = data;
+          dom.customerList.innerHTML =
+            '<p class="no-results">Start typing to search customers</p>';
+        } catch (err) {
+          dom.customerList.innerHTML =
+            '<p class="no-results">Error loading customers. Please refresh.</p>';
+          console.error(err);
+        }
+      }
 
-      <!-- Signature -->
-      <div class="field-group">
-        <label class="field-label">Customer Signature</label>
-        <div class="sig-wrapper">
-          <span class="sig-placeholder" id="sig-placeholder">Sign here</span>
-          <canvas id="signature-canvas"></canvas>
-        </div>
-        <button type="button" class="clear-sig-btn" id="clear-signature-btn">Clear Signature</button>
-      </div>
+      // ══════════════════════════════════════════
+      // SEARCH
+      // ══════════════════════════════════════════
+      dom.searchBar.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) {
+          dom.customerList.innerHTML =
+            '<p class="no-results">Start typing to search customers</p>';
+          return;
+        }
+        const filtered = allCustomers.filter(
+          (c) =>
+            (c.name && c.name.toLowerCase().includes(query)) ||
+            (c.id && c.id.toString().toLowerCase().includes(query)),
+        );
+        renderCustomerList(filtered);
+      });
 
-      <button id="submit-button" class="submit-btn">Confirm Delivery</button>
-    </div>
-
-    <a href="#" id="backToSearch" class="text-link">← Search for another customer</a>
-    <a href="#" id="logout-link-assign" class="logout-link">Logout</a>
-  </div>
-
-</div>
-
-<!-- ══════════════ SCANNER OVERLAY ══════════════ -->
-<div id="scanner-container">
-  <div class="scanner-box">
-    <div id="qr-reader"></div>
-    <button id="cancel-scan" class="cancel-scan-btn">Cancel</button>
-  </div>
-</div>
-
-<!-- ══════════════ HISTORY MODAL ══════════════ -->
-<div id="historyModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>My Delivery History</h2>
-      <button class="close-btn" id="closeModalBtn">&times;</button>
-    </div>
-    <div id="history-table-container">
-      <table id="history-table">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Customer</th>
-            <th>Router</th>
-            <th>SIM</th>
-          </tr>
-        </thead>
-        <tbody id="history-table-body"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<script>
-  // ══════════════════════════════════════════
-  // CONFIG — replace with your Apps Script URL
-  // ══════════════════════════════════════════
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjcTM-qpwKeGjw3ArLrsFkJS9E0zO10NuGuh9lIw8zorpD1Y8wju0sTS-J-j34ve2Nnw/exec';
-
-  const HISTORY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRKPA6yfqgouD1JkUY-LwtTDMpNXxQb8s9KpuRyCpEbPVv1dZXnoUjaiWYi5rWXjz_0U_HcfPo72P8Q/pub?gid=2140533495&single=true&output=csv';
-
-  const PORTAL_AUTH = "Basic MWY3M2M4ODUzY2FiYzg3ZTI0MjIyOWE5NDU1NDg4MDE6MWU2MTM4NzAwMjA0MjlmNjM3NzRjYmYwZjU5ZGIxMTY=";
-
-  // ══════════════════════════════════════════
-  // AUTH
-  // ══════════════════════════════════════════
-  let loggedInUser = null;
-
-  function handleLogout() {
-    localStorage.removeItem('loggedInUser');
-    window.location.href = 'login.html';
-  }
-
-  // ══════════════════════════════════════════
-  // DOM REFS
-  // ══════════════════════════════════════════
-  const dom = {
-    searchView: document.getElementById('searchView'),
-    assignmentView: document.getElementById('assignmentView'),
-    searchBar: document.getElementById('searchBar'),
-    customerList: document.getElementById('customerList'),
-    selectedCustomerInfo: document.getElementById('selectedCustomerInfo'),
-    backToSearchLink: document.getElementById('backToSearch'),
-    scannerContainer: document.getElementById('scanner-container'),
-    cancelScanBtn: document.getElementById('cancel-scan'),
-    signatureCanvas: document.getElementById('signature-canvas'),
-    clearSignatureBtn: document.getElementById('clear-signature-btn'),
-    submitBtn: document.getElementById('submit-button'),
-    idPhotoInput: document.getElementById('id-photo-input'),
-    premisesPhotoInput: document.getElementById('premises-photo-input'),
-    agentNameInput: document.getElementById('agent-name-input'),
-    routerInput: document.getElementById('router-input'),
-    simInput: document.getElementById('sim-input'),
-    sigPlaceholder: document.getElementById('sig-placeholder'),
-    historyModal: document.getElementById('historyModal'),
-    historyTableBody: document.getElementById('history-table-body'),
-    closeModalBtn: document.getElementById('closeModalBtn'),
-    viewHistoryBtn: document.getElementById('viewHistoryBtn')
-  };
-
-  let allCustomers = [];
-  let selectedCustomer = null;
-  let signaturePad = null;
-  let currentScanTargetId = null;
-
-  // ══════════════════════════════════════════
-  // INIT
-  // ══════════════════════════════════════════
-  window.addEventListener('DOMContentLoaded', () => {
-    const stored = localStorage.getItem('loggedInUser');
-    if (!stored) {
-      window.location.href = 'login.html';
-      return;
-    }
-    loggedInUser = JSON.parse(stored);
-    if (loggedInUser.fullName) dom.agentNameInput.value = loggedInUser.fullName;
-
-    document.getElementById('logout-link-search').addEventListener('click', handleLogout);
-    document.getElementById('logout-link-assign').addEventListener('click', handleLogout);
-    dom.viewHistoryBtn.addEventListener('click', showDeliveryHistory);
-    dom.closeModalBtn.addEventListener('click', () => { dom.historyModal.style.display = 'none'; });
-    window.addEventListener('click', e => { if (e.target === dom.historyModal) dom.historyModal.style.display = 'none'; });
-
-    loadCustomers();
-  });
-
-  // ══════════════════════════════════════════
-  // LOAD CUSTOMERS — direct from Splynx via Apps Script doGet
-  // ══════════════════════════════════════════
-  async function loadCustomers() {
-    dom.customerList.innerHTML = '<div class="loading-state"><span class="spinner"></span> Loading customers...</div>';
-    try {
-      const res = await fetch(APPS_SCRIPT_URL);
-      if (!res.ok) throw new Error('Failed to load customers');
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      allCustomers = data;
-      dom.customerList.innerHTML = '';
-      // Show prompt to start typing
-      dom.customerList.innerHTML = '<p class="no-results">Start typing to search customers</p>';
-    } catch (err) {
-      dom.customerList.innerHTML = '<p class="no-results">Error loading customers. Please refresh.</p>';
-      console.error(err);
-    }
-  }
-
-  // ══════════════════════════════════════════
-  // SEARCH & DISPLAY
-  // ══════════════════════════════════════════
-  dom.searchBar.addEventListener('input', e => {
-    const query = e.target.value.toLowerCase().trim();
-    if (!query) {
-      dom.customerList.innerHTML = '<p class="no-results">Start typing to search customers</p>';
-      return;
-    }
-    const filtered = allCustomers.filter(c =>
-      (c.name && c.name.toLowerCase().includes(query)) ||
-      (c.id && c.id.toString().toLowerCase().includes(query))
-    );
-    renderCustomerList(filtered);
-  });
-
-  function renderCustomerList(list) {
-    if (list.length === 0) {
-      dom.customerList.innerHTML = '<p class="no-results">No customers found.</p>';
-      return;
-    }
-    dom.customerList.innerHTML = list.slice(0, 50).map(c => `
+      function renderCustomerList(list) {
+        if (list.length === 0) {
+          dom.customerList.innerHTML =
+            '<p class="no-results">No customers found.</p>';
+          return;
+        }
+        dom.customerList.innerHTML = list
+          .slice(0, 50)
+          .map(
+            (c) => `
       <div class="customer-card" data-id="${c.id}">
         <div>
-          <div class="customer-name">${c.name || 'Unknown'}</div>
-          <div class="customer-id">#${c.id || 'N/A'}</div>
+          <div class="customer-name">${c.name || "Unknown"}</div>
+          <div class="customer-id">#${c.id || "N/A"}</div>
         </div>
         <svg class="customer-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
         </svg>
       </div>
-    `).join('');
+    `,
+          )
+          .join("");
+        dom.customerList.querySelectorAll(".customer-card").forEach((card) => {
+          card.addEventListener("click", () => {
+            const customer = allCustomers.find((c) => c.id == card.dataset.id);
+            if (customer) selectCustomer(customer);
+          });
+        });
+      }
 
-    dom.customerList.querySelectorAll('.customer-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const customer = allCustomers.find(c => c.id == card.dataset.id);
-        if (customer) selectCustomer(customer);
-      });
-    });
-  }
-
-  // ══════════════════════════════════════════
-  // SELECT CUSTOMER
-  // ══════════════════════════════════════════
-  function selectCustomer(customer) {
-    selectedCustomer = customer;
-    const initials = (customer.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-    dom.selectedCustomerInfo.innerHTML = `
+      // ══════════════════════════════════════════
+      // SELECT CUSTOMER
+      // ══════════════════════════════════════════
+      function selectCustomer(customer) {
+        selectedCustomer = customer;
+        const initials = (customer.name || "?")
+          .split(" ")
+          .map((w) => w[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase();
+        dom.selectedCustomerInfo.innerHTML = `
       <div class="customer-banner">
         <div class="customer-banner-avatar">${initials}</div>
         <div>
@@ -799,239 +1404,372 @@
         </div>
       </div>
     `;
-    dom.searchView.style.display = 'none';
-    dom.assignmentView.style.display = 'block';
-    if (!signaturePad) {
-      signaturePad = new SignaturePad(dom.signatureCanvas, { backgroundColor: 'white' });
-      signaturePad.addEventListener('beginStroke', () => {
-        dom.sigPlaceholder.style.opacity = '0';
-      });
-    }
-    resizeCanvas();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // ══════════════════════════════════════════
-  // SIGNATURE PAD
-  // ══════════════════════════════════════════
-  function resizeCanvas() {
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    const canvas = dom.signatureCanvas;
-    const data = signaturePad ? signaturePad.toData() : null;
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
-    canvas.getContext('2d').scale(ratio, ratio);
-    if (signaturePad) {
-      signaturePad.clear();
-      if (data && data.length) signaturePad.fromData(data);
-    }
-  }
-
-  dom.clearSignatureBtn.addEventListener('click', () => {
-    if (signaturePad) signaturePad.clear();
-    dom.sigPlaceholder.style.opacity = '1';
-  });
-
-  window.addEventListener('resize', resizeCanvas);
-
-  // ══════════════════════════════════════════
-  // QR SCANNER
-  // ══════════════════════════════════════════
-  const html5QrCode = new Html5Qrcode('qr-reader');
-
-  function startScanner(targetInputId) {
-    currentScanTargetId = targetInputId;
-    dom.scannerContainer.style.display = 'flex';
-    html5QrCode.start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      (decodedText) => {
-        if (currentScanTargetId) document.getElementById(currentScanTargetId).value = decodedText;
-        stopScanner();
-      },
-      () => {}
-    ).catch(() => { alert('Could not start camera scanner.'); stopScanner(); });
-  }
-
-  function stopScanner() {
-    html5QrCode.stop().catch(() => {}).finally(() => {
-      dom.scannerContainer.style.display = 'none';
-      currentScanTargetId = null;
-    });
-  }
-
-  dom.cancelScanBtn.addEventListener('click', stopScanner);
-
-  document.querySelectorAll('.scan-btn[data-target]').forEach(btn =>
-    btn.addEventListener('click', () => startScanner(btn.dataset.target))
-  );
-
-  // ══════════════════════════════════════════
-  // PHOTO CAPTURE
-  // ══════════════════════════════════════════
-  document.querySelectorAll('.photo-btn[data-target]').forEach(btn =>
-    btn.addEventListener('click', () => document.getElementById(btn.dataset.target).click())
-  );
-
-  document.querySelectorAll("input[type='file']").forEach(input => {
-    input.addEventListener('change', e => {
-      const previewId = e.target.id.replace('-input', '-preview');
-      const img = document.getElementById(previewId);
-      if (e.target.files[0]) {
-        img.src = URL.createObjectURL(e.target.files[0]);
-        img.classList.add('has-image');
-      }
-    });
-  });
-
-  // ══════════════════════════════════════════
-  // BACK TO SEARCH
-  // ══════════════════════════════════════════
-  dom.backToSearchLink.addEventListener('click', e => {
-    e.preventDefault();
-    dom.assignmentView.style.display = 'none';
-    dom.searchView.style.display = 'block';
-    dom.routerInput.value = '';
-    dom.simInput.value = '';
-    dom.idPhotoInput.value = '';
-    dom.premisesPhotoInput.value = '';
-    document.getElementById('id-photo-preview').classList.remove('has-image');
-    document.getElementById('premises-photo-preview').classList.remove('has-image');
-    if (signaturePad) signaturePad.clear();
-    dom.sigPlaceholder.style.opacity = '1';
-    selectedCustomer = null;
-  });
-
-  // ══════════════════════════════════════════
-  // FILE HELPER
-  // ══════════════════════════════════════════
-  function dataURLtoFile(dataurl, filename) {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) u8arr[n] = bstr.charCodeAt(n);
-    return new File([u8arr], filename, { type: mime });
-  }
-
-  // ══════════════════════════════════════════
-  // SUBMIT DELIVERY
-  // ══════════════════════════════════════════
-  dom.submitBtn.addEventListener('click', submitDelivery);
-
-  async function submitDelivery() {
-    if (!selectedCustomer || !dom.routerInput.value || !dom.simInput.value || !dom.agentNameInput.value) {
-      alert('Please fill in Customer, Agent, Router, and SIM card details.');
-      return;
-    }
-    if (signaturePad.isEmpty()) {
-      alert('Please provide a customer signature.');
-      return;
-    }
-
-    dom.submitBtn.disabled = true;
-    dom.submitBtn.textContent = 'Submitting...';
-
-    try {
-      // 1. Upload files to portal
-      const idPhotoFile = dom.idPhotoInput.files[0];
-      const premisesPhotoFile = dom.premisesPhotoInput.files[0];
-      const signatureFile = dataURLtoFile(signaturePad.toDataURL('image/png'), 'signature.png');
-
-      const filesToUpload = [
-        { file: idPhotoFile, title: 'ID Copy', description: 'Customer ID Copy' },
-        { file: premisesPhotoFile, title: 'Customer Premises Photo', description: 'Photo of installation site' },
-        { file: signatureFile, title: 'Signature', description: 'Customer Signature' }
-      ];
-
-      for (const item of filesToUpload) {
-        if (!item.file) continue;
-        const createRes = await fetch(
-          'https://portal.umoja.network/api/2.0/admin/customers/customer-documents',
-          {
-            method: 'POST',
-            headers: { 'Authorization': PORTAL_AUTH, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              customer_id: selectedCustomer.id,
-              type: 'uploaded',
-              title: item.title,
-              description: item.description,
-              visible_by_customer: '0'
-            })
-          }
-        );
-        if (!createRes.ok) throw new Error(`Failed to create document: ${item.title}`);
-        const createdDoc = await createRes.json();
-        const formData = new FormData();
-        formData.append('file', item.file);
-        const uploadRes = await fetch(
-          `https://portal.umoja.network/api/2.0/admin/customers/customer-documents/${createdDoc.id}--upload`,
-          { method: 'POST', headers: { 'Authorization': PORTAL_AUTH }, body: formData }
-        );
-        if (!uploadRes.ok) throw new Error(`Failed to upload: ${item.title}`);
-      }
-
-      // 2. Send data to Google Sheet via Apps Script POST
-      const sheetFormData = new FormData();
-      sheetFormData.append('Customer ID', selectedCustomer.id);
-      sheetFormData.append('Name', selectedCustomer.name);
-      sheetFormData.append('Router Barcode', dom.routerInput.value);
-      sheetFormData.append('SIM Barcode', dom.simInput.value);
-      sheetFormData.append('Agent', dom.agentNameInput.value);
-
-      const sheetRes = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: sheetFormData });
-      const sheetResult = await sheetRes.json();
-      if (sheetResult.result !== 'success') throw new Error('Data saved to portal but failed to log to Google Sheet.');
-
-      alert('✅ Delivery confirmed and all data saved successfully!');
-      dom.backToSearchLink.click();
-
-    } catch (error) {
-      console.error(error);
-      alert('❌ Error: ' + error.message);
-    } finally {
-      dom.submitBtn.disabled = false;
-      dom.submitBtn.textContent = 'Confirm Delivery';
-    }
-  }
-
-  // ══════════════════════════════════════════
-  // DELIVERY HISTORY
-  // ══════════════════════════════════════════
-  async function showDeliveryHistory() {
-    if (!loggedInUser) { alert('Could not identify agent.'); return; }
-    dom.historyTableBody.innerHTML = '<tr><td colspan="4"><div class="loading-state"><span class="spinner"></span> Loading...</div></td></tr>';
-    dom.historyModal.style.display = 'block';
-
-    try {
-      const url = `${HISTORY_CSV_URL}&t=${new Date().getTime()}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Network error');
-      const csvText = await res.text();
-      const rows = csvText.split(/\r?\n/).slice(1);
-      const agentName = loggedInUser.fullName;
-      let html = '';
-
-      rows.reverse().forEach(rowText => {
-        if (!rowText) return;
-        const cols = rowText.split(',');
-        if ((cols[5] || '').trim() === agentName) {
-          html += `<tr>
-            <td>${(cols[0] || '').trim()}</td>
-            <td>${(cols[2] || '').trim()}</td>
-            <td>${(cols[3] || '').trim()}</td>
-            <td>${(cols[4] || '').trim()}</td>
-          </tr>`;
+        dom.searchView.style.display = "none";
+        dom.assignmentView.style.display = "block";
+        // Reset collector to "customer"
+        setCollectorType(false);
+        if (!signaturePad) {
+          signaturePad = new SignaturePad(dom.signatureCanvas, {
+            backgroundColor: "white",
+          });
+          signaturePad.addEventListener("beginStroke", () => {
+            dom.sigPlaceholder.style.opacity = "0";
+          });
         }
+        resizeCanvas();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // ══════════════════════════════════════════
+      // SIGNATURE
+      // ══════════════════════════════════════════
+      function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        const canvas = dom.signatureCanvas;
+        const data = signaturePad ? signaturePad.toData() : null;
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        if (signaturePad) {
+          signaturePad.clear();
+          if (data && data.length) signaturePad.fromData(data);
+        }
+      }
+      dom.clearSignatureBtn.addEventListener("click", () => {
+        if (signaturePad) signaturePad.clear();
+        dom.sigPlaceholder.style.opacity = "1";
+      });
+      window.addEventListener("resize", resizeCanvas);
+
+      // ══════════════════════════════════════════
+      // QR SCANNER
+      // ══════════════════════════════════════════
+      const html5QrCode = new Html5Qrcode("qr-reader");
+
+      function startScanner(targetInputId) {
+        currentScanTargetId = targetInputId;
+        dom.scannerContainer.style.display = "flex";
+        html5QrCode
+          .start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (decodedText) => {
+              if (currentScanTargetId)
+                document.getElementById(currentScanTargetId).value =
+                  decodedText;
+              stopScanner();
+            },
+            () => {},
+          )
+          .catch(() => {
+            alert("Could not start camera scanner.");
+            stopScanner();
+          });
+      }
+
+      function stopScanner() {
+        html5QrCode
+          .stop()
+          .catch(() => {})
+          .finally(() => {
+            dom.scannerContainer.style.display = "none";
+            currentScanTargetId = null;
+          });
+      }
+
+      dom.cancelScanBtn.addEventListener("click", stopScanner);
+      document
+        .querySelectorAll(".scan-btn[data-target]")
+        .forEach((btn) =>
+          btn.addEventListener("click", () => startScanner(btn.dataset.target)),
+        );
+
+      // ══════════════════════════════════════════
+      // PHOTO CAPTURE
+      // ══════════════════════════════════════════
+      document
+        .querySelectorAll(".photo-btn[data-target]")
+        .forEach((btn) =>
+          btn.addEventListener("click", () =>
+            document.getElementById(btn.dataset.target).click(),
+          ),
+        );
+      // Upload button (proof of residence)
+      document
+        .querySelectorAll(".upload-btn[data-target]")
+        .forEach((btn) =>
+          btn.addEventListener("click", () =>
+            document.getElementById(btn.dataset.target).click(),
+          ),
+        );
+
+      // Standard image previews (all file inputs except por-input which is handled separately)
+      [
+        "id-photo-input",
+        "premises-photo-input",
+        "collector-id-input",
+        "collector-portrait-input",
+      ].forEach((id) => {
+        document.getElementById(id).addEventListener("change", (e) => {
+          const previewId = id.replace("-input", "-preview");
+          const img = document.getElementById(previewId);
+          if (img && e.target.files[0]) {
+            img.src = URL.createObjectURL(e.target.files[0]);
+            img.classList.add("has-image");
+          }
+        });
       });
 
-      dom.historyTableBody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:#999;padding:20px">No delivery history found.</td></tr>';
-    } catch (err) {
-      console.error(err);
-      dom.historyTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#e84040;padding:20px">Failed to load history.</td></tr>';
-    }
-  }
-</script>
-</body>
+      // ══════════════════════════════════════════
+      // BACK TO SEARCH
+      // ══════════════════════════════════════════
+      dom.backToSearchLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        dom.assignmentView.style.display = "none";
+        dom.searchView.style.display = "block";
+        // Reset all fields
+        dom.routerInput.value = "";
+        dom.simInput.value = "";
+        dom.idPhotoInput.value = "";
+        dom.premisesPhotoInput.value = "";
+        dom.collectorNameInput.value = "";
+        dom.collectorIdInput.value = "";
+        dom.collectorPortraitInput.value = "";
+        dom.porInput.value = "";
+        dom.porPreview.classList.remove("has-image");
+        dom.porFileName.style.display = "none";
+        [
+          "id-photo-preview",
+          "premises-photo-preview",
+          "collector-id-preview",
+          "collector-portrait-preview",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.remove("has-image");
+        });
+        if (signaturePad) signaturePad.clear();
+        dom.sigPlaceholder.style.opacity = "1";
+        setCollectorType(false);
+        selectedCustomer = null;
+      });
+
+      // ══════════════════════════════════════════
+      // FILE HELPER
+      // ══════════════════════════════════════════
+      function dataURLtoFile(dataurl, filename) {
+        const arr = dataurl.split(",");
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
+        return new File([u8arr], filename, { type: mime });
+      }
+
+      // ══════════════════════════════════════════
+      // SUBMIT
+      // ══════════════════════════════════════════
+      dom.submitBtn.addEventListener("click", submitDelivery);
+
+      async function submitDelivery() {
+        if (
+          !selectedCustomer ||
+          !dom.routerInput.value ||
+          !dom.simInput.value ||
+          !dom.agentNameInput.value
+        ) {
+          alert(
+            "Please fill in Customer, Agent, Router, and SIM card details.",
+          );
+          return;
+        }
+        if (signaturePad.isEmpty()) {
+          alert("Please provide a customer signature.");
+          return;
+        }
+        // Validate third-party fields if applicable
+        if (collectorIsThirdParty) {
+          if (!dom.collectorNameInput.value.trim()) {
+            alert("Please enter the collector's full name.");
+            return;
+          }
+        }
+
+        dom.submitBtn.disabled = true;
+        dom.submitBtn.textContent = "Submitting...";
+
+        try {
+          const idPhotoFile = dom.idPhotoInput.files[0];
+          const premisesPhotoFile = dom.premisesPhotoInput.files[0];
+          const porFile = dom.porInput.files[0];
+          const signatureFile = dataURLtoFile(
+            signaturePad.toDataURL("image/png"),
+            "signature.png",
+          );
+
+          // Build file upload list
+          const filesToUpload = [
+            {
+              file: idPhotoFile,
+              title: "ID Copy",
+              description: "Customer ID Copy",
+            },
+            {
+              file: premisesPhotoFile,
+              title: "Customer Premises Photo",
+              description: "Photo of installation site",
+            },
+            {
+              file: porFile,
+              title: "Proof of Residence",
+              description: "Proof of residence document",
+            },
+            {
+              file: signatureFile,
+              title: "Signature",
+              description: "Customer Signature",
+            },
+          ];
+
+          // Third-party collector documents
+          if (collectorIsThirdParty) {
+            const collectorIdFile = dom.collectorIdInput.files[0];
+            const collectorPortraitFile = dom.collectorPortraitInput.files[0];
+            const collectorName = dom.collectorNameInput.value.trim();
+            if (collectorIdFile) {
+              filesToUpload.push({
+                file: collectorIdFile,
+                title: "Collector ID Copy",
+                description: `ID of ${collectorName}`,
+              });
+            }
+            if (collectorPortraitFile) {
+              filesToUpload.push({
+                file: collectorPortraitFile,
+                title: "Collector Portrait",
+                description: `Photo of ${collectorName}`,
+              });
+            }
+          }
+
+          // Upload each file to Splynx
+          for (const item of filesToUpload) {
+            if (!item.file) continue;
+            const createRes = await fetch(
+              "https://portal.umoja.network/api/2.0/admin/customers/customer-documents",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: PORTAL_AUTH,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  customer_id: selectedCustomer.id,
+                  type: "uploaded",
+                  title: item.title,
+                  description: item.description,
+                  visible_by_customer: "0",
+                }),
+              },
+            );
+            if (!createRes.ok)
+              throw new Error(
+                `Failed to create document record: ${item.title}`,
+              );
+            const createdDoc = await createRes.json();
+            const formData = new FormData();
+            formData.append("file", item.file);
+            const uploadRes = await fetch(
+              `https://portal.umoja.network/api/2.0/admin/customers/customer-documents/${createdDoc.id}--upload`,
+              {
+                method: "POST",
+                headers: { Authorization: PORTAL_AUTH },
+                body: formData,
+              },
+            );
+            if (!uploadRes.ok)
+              throw new Error(`Failed to upload: ${item.title}`);
+          }
+
+          // Log to Google Sheet
+          const sheetFormData = new FormData();
+          sheetFormData.append("Customer ID", selectedCustomer.id);
+          sheetFormData.append("Name", selectedCustomer.name);
+          sheetFormData.append("Router Barcode", dom.routerInput.value);
+          sheetFormData.append("SIM Barcode", dom.simInput.value);
+          sheetFormData.append("Agent", dom.agentNameInput.value);
+          sheetFormData.append(
+            "Collector Type",
+            collectorIsThirdParty ? "Third Party" : "Customer",
+          );
+          if (collectorIsThirdParty) {
+            sheetFormData.append(
+              "Collector Name",
+              dom.collectorNameInput.value.trim(),
+            );
+          }
+
+          const sheetRes = await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            body: sheetFormData,
+          });
+          const sheetResult = await sheetRes.json();
+          if (sheetResult.result !== "success")
+            throw new Error(
+              "Data saved to portal but failed to log to Google Sheet.",
+            );
+
+          alert("✅ Delivery confirmed and all data saved successfully!");
+          dom.backToSearchLink.click();
+        } catch (error) {
+          console.error(error);
+          alert("❌ Error: " + error.message);
+        } finally {
+          dom.submitBtn.disabled = false;
+          dom.submitBtn.textContent = "Confirm Delivery";
+        }
+      }
+
+      // ══════════════════════════════════════════
+      // DELIVERY HISTORY
+      // ══════════════════════════════════════════
+      async function showDeliveryHistory() {
+        if (!loggedInUser) {
+          alert("Could not identify agent.");
+          return;
+        }
+        dom.historyTableBody.innerHTML =
+          '<tr><td colspan="4"><div class="loading-state"><span class="spinner"></span> Loading...</div></td></tr>';
+        dom.historyModal.style.display = "block";
+        try {
+          const url = `${HISTORY_CSV_URL}&t=${new Date().getTime()}`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("Network error");
+          const csvText = await res.text();
+          const rows = csvText.split(/\r?\n/).slice(1);
+          const agentName = loggedInUser.fullName;
+          let html = "";
+          rows.reverse().forEach((rowText) => {
+            if (!rowText) return;
+            const cols = rowText.split(",");
+            if ((cols[5] || "").trim() === agentName) {
+              html += `<tr>
+            <td>${(cols[0] || "").trim()}</td>
+            <td>${(cols[2] || "").trim()}</td>
+            <td>${(cols[3] || "").trim()}</td>
+            <td>${(cols[4] || "").trim()}</td>
+          </tr>`;
+            }
+          });
+          dom.historyTableBody.innerHTML =
+            html ||
+            '<tr><td colspan="4" style="text-align:center;color:#999;padding:20px">No delivery history found.</td></tr>';
+        } catch (err) {
+          console.error(err);
+          dom.historyTableBody.innerHTML =
+            '<tr><td colspan="4" style="text-align:center;color:#e84040;padding:20px">Failed to load history.</td></tr>';
+        }
+      }
+    </script>
+  </body>
 </html>
