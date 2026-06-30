@@ -103,8 +103,11 @@ function findUser_(login) {
     salt: head.indexOf("salt"),
     passwordHash: head.indexOf("passwordhash"),
   };
+  // Compare by digits only, ignoring leading zeros — so a phone number stored
+  // as a number (leading 0 stripped by Sheets) still matches what's typed.
+  var want = normalizePhone_(login);
   for (var r = 1; r < rows.length; r++) {
-    if (String(rows[r][ci.login]).trim() === login) {
+    if (normalizePhone_(rows[r][ci.login]) === want) {
       return {
         id: rows[r][ci.id],
         login: String(rows[r][ci.login]).trim(),
@@ -142,6 +145,12 @@ function sign_(data) {
   return Utilities.base64EncodeWebSafe(
     Utilities.computeHmacSha256Signature(data, TOKEN_SECRET),
   );
+}
+
+function normalizePhone_(v) {
+  return String(v == null ? "" : v)
+    .replace(/\D/g, "")
+    .replace(/^0+/, "");
 }
 
 function hashPassword_(salt, password) {
