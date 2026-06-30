@@ -95,19 +95,21 @@
         <p>Sign in to access delivery tools</p>
 
         <form id="loginForm">
-          <label>Username</label>
+          <label for="username">Username</label>
           <input
             type="text"
             id="username"
             placeholder="Enter your username"
+            autocomplete="username"
             required
           />
 
-          <label>Password</label>
+          <label for="password">Password</label>
           <input
             type="password"
             id="password"
             placeholder="Enter your password"
+            autocomplete="current-password"
             required
           />
 
@@ -119,40 +121,63 @@
     </div>
 
     <script>
-      const admins = [
-        { id: 1, login: "0726665675", fullName: "Mobeen Bhamjee" },
-        { id: 5, login: "0768162889", fullName: "Masood Bhamjee" },
-        { id: 6, login: "0712224025", fullName: "Ngaoko David Ralio" },
-        { id: 7, login: "0780979587", fullName: "Thabang Lehloenya" },
-        { id: 12, login: "0733891382", fullName: "Aysha" },
-        { id: 15, login: "0845807973", fullName: "Mohamed Mukhtar" },
-        { id: 17, login: "0672649653", fullName: "Thabiso Lehloenya" },
-        { id: 18, login: "0814090910", fullName: "Thabiso Tlatsa" },
-        { id: 19, login: "0636105267", fullName: "Thami Moisela" },
-        { id: 21, login: "0728407894", fullName: "Neo" },
-        { id: 22, login: "0792822237", fullName: "Salmaan Mahomed" },
-        { id: 23, login: "0766238727", fullName: "Mpoi" },
-        { id: 24, login: "0762956670", fullName: "Luyanda Rammalo" },
-      ];
+      // ══════════════════════════════════════════
+      // CONFIG
+      // ══════════════════════════════════════════
+      // Authentication is performed server-side by the Google Apps Script proxy,
+      // which validates credentials and returns a session token. No user list or
+      // password logic lives in the browser. See DEPLOYMENT.md.
+      const PROXY_URL =
+        "https://script.google.com/macros/s/AKfycbyjcTM-qpwKeGjw3ArLrsFkJS9E0zO10NuGuh9lIw8zorpD1Y8wju0sTS-J-j34ve2Nnw/exec";
 
       const loginForm = document.getElementById("loginForm");
       const error = document.getElementById("error");
+      const submitBtn = loginForm.querySelector("button[type='submit']");
 
-      loginForm.addEventListener("submit", (e) => {
+      loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
 
-        // Check if username exists in admin list
-        const admin = admins.find((a) => a.login === username);
+        if (!username || !password) {
+          error.textContent = "Please enter your username and password.";
+          return;
+        }
 
-        if (admin) {
-          // Save technician info (optional for future use)
-          localStorage.setItem("loggedInUser", JSON.stringify(admin));
+        error.textContent = "";
+        const originalLabel = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Signing in...";
 
-          // Redirect to main page
+        try {
+          // Sent as text/plain to avoid a CORS preflight against Apps Script.
+          const res = await fetch(PROXY_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "login", username, password }),
+          });
+          const data = await res.json();
+          if (!res.ok || !data || data.result !== "success" || !data.user) {
+            throw new Error(
+              (data && data.error) || "Invalid login. Please try again.",
+            );
+          }
+
+          localStorage.setItem(
+            "loggedInUser",
+            JSON.stringify({
+              id: data.user.id,
+              login: data.user.login,
+              fullName: data.user.fullName,
+              token: data.token,
+            }),
+          );
           window.location.href = "Confirmation.html";
-        } else {
-          error.textContent = "Invalid login. Please try again.";
+        } catch (err) {
+          error.textContent =
+            err.message || "Login failed. Please check your connection.";
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
         }
       });
     </script>
