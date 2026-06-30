@@ -23,28 +23,49 @@ and pushed to this repo, so it is compromised and present in git history.
 
 ---
 
-## 1. Create the spreadsheet + proxy
+> **Deploy this as its own standalone Apps Script project.** Do **not** paste it
+> into an existing shared project (e.g. "Project 700 Flow") — a project can only
+> have one `doGet`/`doPost`, and overwriting a shared project would break your
+> other automations.
 
-1. Create a Google Spreadsheet (this stores the delivery log and the user list).
-2. Add a sheet named **`Users`** with this header row:
+## 1. Create the proxy project + Users sheet
+
+1. Use your existing delivery spreadsheet (the one whose log tab the history CSV
+   is published from — its tab is named `Deliverd_Devices`). Copy its **ID** from
+   the URL: `…/spreadsheets/d/`**`<THIS_ID>`**`/edit`.
+2. In that spreadsheet, add a sheet named **`Users`** with this header row:
 
    | id | login | fullName | salt | passwordHash |
    |----|-------|----------|------|--------------|
 
    Leave the data rows empty for now (you'll add users in step 3).
-   The `Deliveries` sheet is created automatically on the first submission.
-3. **Extensions → Apps Script**, delete the boilerplate, and paste the contents
-   of [`apps-script-proxy.gs`](apps-script-proxy.gs).
+3. Go to **script.google.com → New project** (a fresh, standalone project).
+   Delete the boilerplate and paste the contents of
+   [`apps-script-proxy.gs`](apps-script-proxy.gs).
 
 ## 2. Configure Script Properties
 
 **Project Settings → Script properties** → add:
 
-| Property       | Value                                                        |
-|----------------|--------------------------------------------------------------|
-| `SPLYNX_BASE`  | `https://portal.umoja.network/api/2.0/admin`                 |
-| `SPLYNX_AUTH`  | `Basic <base64(newApiKey:newApiSecret)>` (the rotated key)   |
-| `TOKEN_SECRET` | a long random string (signs session tokens)                  |
+| Property         | Value                                                        |
+|------------------|--------------------------------------------------------------|
+| `SPLYNX_BASE`    | `https://portal.umoja.network/api/2.0/admin`                 |
+| `SPLYNX_AUTH`    | `Basic <base64(newApiKey:newApiSecret)>` (the rotated key)   |
+| `TOKEN_SECRET`   | a long random string (signs session tokens)                  |
+| `SPREADSHEET_ID` | the spreadsheet id from step 1                               |
+
+Optional:
+
+| Property          | Value                                                                 |
+|-------------------|-----------------------------------------------------------------------|
+| `LOG_SHEET`       | delivery-log tab name (defaults to `Deliverd_Devices`)                |
+| `CUSTOMERS_SHEET` | a sheet to read customers from; if unset, customers come from Splynx  |
+
+The delivery log is appended to `LOG_SHEET` by matching its **existing header
+row**, so your current sheet and the published history CSV keep working. To
+capture the new data, optionally add any of these columns to that tab:
+`Agent ID | Latitude | Longitude | Accuracy | Delivery ID` (a `Delivery ID`
+column also enables duplicate-submit protection).
 
 ## 3. Add technician logins
 
