@@ -1477,7 +1477,8 @@
           if (!res.ok) throw new Error("Failed to load customers");
           const data = await res.json();
           if (data.error) throw new Error(data.error);
-          allCustomers = data;
+          // Proxy returns { result, data: [...] }; tolerate a bare array too.
+          allCustomers = Array.isArray(data) ? data : data.data || [];
           dom.customerList.innerHTML =
             '<p class="no-results">Start typing to search customers</p>';
         } catch (err) {
