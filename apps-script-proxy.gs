@@ -4,18 +4,31 @@
  *
  * This Web App is the ONLY place that holds privileged credentials. The static
  * front-end (index.html / Confirmation.html) calls it and never sees the Splynx
- * API key or any password. Deploy it as a Web App ("Execute as: Me",
- * "Who has access: Anyone") and paste the resulting /exec URL into PROXY_URL in
- * both HTML files. See DEPLOYMENT.md for step-by-step instructions.
+ * API key or any password. Deploy it as its OWN standalone Apps Script project
+ * (script.google.com → New project — keep it separate from other automations),
+ * deploy as a Web App ("Execute as: Me", "Who has access: Anyone"), and paste
+ * the resulting /exec URL into PROXY_URL in both HTML files. See DEPLOYMENT.md.
  *
  * Required Script Properties (Project Settings → Script properties):
- *   SPLYNX_BASE   e.g. https://portal.umoja.network/api/2.0/admin
- *   SPLYNX_AUTH   e.g. Basic <base64(apiKey:apiSecret)>   ← ROTATE the leaked key first
- *   TOKEN_SECRET  any long random string (used to sign session tokens)
+ *   SPLYNX_BASE     e.g. https://portal.umoja.network/api/2.0/admin
+ *   SPLYNX_AUTH     e.g. Basic <base64(apiKey:apiSecret)>  ← ROTATE the leaked key first
+ *   TOKEN_SECRET    any long random string (used to sign session tokens)
+ *   SPREADSHEET_ID  id of the spreadsheet holding the log + Users sheets
+ *                   (from its URL: /spreadsheets/d/<THIS_ID>/edit)
  *
- * Required sheets in the bound spreadsheet:
- *   "Users"       columns: id | login | fullName | salt | passwordHash
- *   "Deliveries"  (created automatically on first submit)
+ * Optional Script Properties:
+ *   LOG_SHEET        name of the existing delivery-log tab (default "Deliverd_Devices")
+ *   CUSTOMERS_SHEET  name of a sheet to read the customer list from; if unset,
+ *                    customers are fetched live from Splynx
+ *
+ * Required sheet in that spreadsheet:
+ *   "Users"   columns: id | login | fullName | salt | passwordHash
+ *
+ * The delivery log is appended to LOG_SHEET by matching its existing header row,
+ * so your current sheet and the published history CSV keep working. To capture
+ * the new fields, add any of these columns to that sheet (optional):
+ *   Agent ID | Latitude | Longitude | Accuracy | Delivery ID
+ * (A "Delivery ID" column also enables duplicate-submit protection.)
  */
 
 var PROPS = PropertiesService.getScriptProperties();
@@ -77,7 +90,7 @@ function login_(username, password) {
 }
 
 function findUser_(login) {
-  var sheet = SpreadsheetApp.getActive().getSheetByName("Users");
+  var sheet = getSpreadsheet_().getSheetByName("Users");
   if (!sheet) throw new Error("Users sheet not found.");
   var rows = sheet.getDataRange().getValues();
   var head = rows[0].map(function (h) {
@@ -90,8 +103,11 @@ function findUser_(login) {
     salt: head.indexOf("salt"),
     passwordHash: head.indexOf("passwordhash"),
   };
+  // Compare by digits only, ignoring leading zeros — so a phone number stored
+  // as a number (leading 0 stripped by Sheets) still matches what's typed.
+  var want = normalizePhone_(login);
   for (var r = 1; r < rows.length; r++) {
-    if (String(rows[r][ci.login]).trim() === login) {
+    if (normalizePhone_(rows[r][ci.login]) === want) {
       return {
         id: rows[r][ci.id],
         login: String(rows[r][ci.login]).trim(),
@@ -131,6 +147,12 @@ function sign_(data) {
   );
 }
 
+function normalizePhone_(v) {
+  return String(v == null ? "" : v)
+    .replace(/\D/g, "")
+    .replace(/^0+/, "");
+}
+
 function hashPassword_(salt, password) {
   var bytes = Utilities.computeDigest(
     Utilities.DigestAlgorithm.SHA_256,
@@ -143,7 +165,13 @@ function hashPassword_(salt, password) {
 // CUSTOMERS
 // ─────────────────────────────────────────────────────────────
 function listCustomers_() {
-  // Pull the active customer list from Splynx and return only {id, name}.
+  // If CUSTOMERS_SHEET is set, read the list from that sheet (e.g. one your
+  // existing Sync_For_Delivery flow populates); otherwise fetch live from Splynx.
+  var sheetName = PROPS.getProperty("CUSTOMERS_SHEET");
+  return sheetName ? customersFromSheet_(sheetName) : customersFromSplynx_();
+}
+
+function customersFromSplynx_() {
   var res = UrlFetchApp.fetch(SPLYNX_BASE + "/customers/customer", {
     method: "get",
     headers: { Authorization: SPLYNX_AUTH },
@@ -158,14 +186,42 @@ function listCustomers_() {
   });
 }
 
+function customersFromSheet_(name) {
+  var sheet = getSpreadsheet_().getSheetByName(name);
+  if (!sheet) throw new Error("Customers sheet not found: " + name);
+  var rows = sheet.getDataRange().getValues();
+  if (rows.length < 2) return [];
+  var head = rows[0].map(function (h) {
+    return String(h).trim().toLowerCase();
+  });
+  var idCol = head.indexOf("id");
+  if (idCol < 0) idCol = head.indexOf("customer id");
+  var nameCol = head.indexOf("name");
+  if (nameCol < 0) nameCol = head.indexOf("customer name");
+  var out = [];
+  for (var r = 1; r < rows.length; r++) {
+    var id = rows[r][idCol];
+    var nm = rows[r][nameCol];
+    if (id === "" && nm === "") continue;
+    out.push({ id: id, name: nm });
+  }
+  return out;
+}
+
 // ─────────────────────────────────────────────────────────────
 // SUBMIT DELIVERY
 // ─────────────────────────────────────────────────────────────
 function submitDelivery_(body) {
-  var sheet = getDeliveriesSheet_();
+  var sheet = getLogSheet_();
+  var header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var idxDelivery = header.indexOf("Delivery ID");
 
-  // Idempotency: if this deliveryId was already committed, do nothing.
-  if (body.deliveryId && deliveryExists_(sheet, body.deliveryId)) {
+  // Idempotency: skip if this deliveryId is already logged (needs the column).
+  if (
+    body.deliveryId &&
+    idxDelivery >= 0 &&
+    logHasDelivery_(sheet, idxDelivery, body.deliveryId)
+  ) {
     return { result: "success", note: "Already recorded." };
   }
 
@@ -178,23 +234,31 @@ function submitDelivery_(body) {
     uploadDocument_(customerId, f);
   });
 
-  // Log the delivery row.
+  // Append a row matching the sheet's existing header names. Unknown columns
+  // are left blank; recognised columns are filled regardless of their order.
   var loc = body.location || {};
-  sheet.appendRow([
-    body.capturedAt || new Date().toISOString(),
-    customerId,
-    (body.customer && body.customer.name) || "",
-    body.router || "",
-    body.sim || "",
-    (body.agent && body.agent.name) || "",
-    (body.agent && body.agent.id) || "",
-    (body.collector && body.collector.type) || "",
-    (body.collector && body.collector.name) || "",
-    loc.latitude != null ? loc.latitude : "",
-    loc.longitude != null ? loc.longitude : "",
-    loc.accuracy != null ? loc.accuracy : "",
-    body.deliveryId || "",
-  ]);
+  var now = new Date();
+  var values = {
+    Time: now,
+    Timestamp: now,
+    "Customer ID": customerId,
+    Name: (body.customer && body.customer.name) || "",
+    "Router Barcode": body.router || "",
+    "SIM Barcode": body.sim || "",
+    Agent: (body.agent && body.agent.name) || "",
+    "Agent ID": (body.agent && body.agent.id) || "",
+    "Collector Type": (body.collector && body.collector.type) || "",
+    "Collector Name": (body.collector && body.collector.name) || "",
+    Latitude: loc.latitude != null ? loc.latitude : "",
+    Longitude: loc.longitude != null ? loc.longitude : "",
+    Accuracy: loc.accuracy != null ? loc.accuracy : "",
+    "Delivery ID": body.deliveryId || "",
+  };
+  var row = header.map(function (h) {
+    var key = String(h).trim();
+    return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : "";
+  });
+  sheet.appendRow(row);
 
   return { result: "success" };
 }
@@ -242,39 +306,29 @@ function uploadDocument_(customerId, f) {
   }
 }
 
-function getDeliveriesSheet_() {
-  var ss = SpreadsheetApp.getActive();
-  var sheet = ss.getSheetByName("Deliveries");
-  if (!sheet) {
-    sheet = ss.insertSheet("Deliveries");
-    sheet.appendRow([
-      "Timestamp",
-      "Customer ID",
-      "Name",
-      "Router Barcode",
-      "SIM Barcode",
-      "Agent",
-      "Agent ID",
-      "Collector Type",
-      "Collector Name",
-      "Latitude",
-      "Longitude",
-      "Accuracy",
-      "Delivery ID",
-    ]);
-  }
+function getLogSheet_() {
+  var name = PROPS.getProperty("LOG_SHEET") || "Deliverd_Devices";
+  var sheet = getSpreadsheet_().getSheetByName(name);
+  if (!sheet) throw new Error("Log sheet not found: " + name);
   return sheet;
 }
 
-function deliveryExists_(sheet, deliveryId) {
+function logHasDelivery_(sheet, idxDelivery, deliveryId) {
   var values = sheet.getDataRange().getValues();
-  if (!values.length) return false;
-  var idCol = values[0].indexOf("Delivery ID");
-  if (idCol < 0) return false;
   for (var r = 1; r < values.length; r++) {
-    if (String(values[r][idCol]) === String(deliveryId)) return true;
+    if (String(values[r][idxDelivery]) === String(deliveryId)) return true;
   }
   return false;
+}
+
+// Resolve the spreadsheet by id (standalone project) or fall back to the bound
+// spreadsheet if this script is container-bound.
+function getSpreadsheet_() {
+  var id = PROPS.getProperty("SPREADSHEET_ID");
+  if (id) return SpreadsheetApp.openById(id);
+  var active = SpreadsheetApp.getActive();
+  if (active) return active;
+  throw new Error("Set the SPREADSHEET_ID script property.");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -298,6 +352,6 @@ function addUser() {
   var password = "CHANGE_ME";
 
   var salt = Utilities.getUuid();
-  var sheet = SpreadsheetApp.getActive().getSheetByName("Users");
+  var sheet = getSpreadsheet_().getSheetByName("Users");
   sheet.appendRow([id, login, fullName, salt, hashPassword_(salt, password)]);
 }
