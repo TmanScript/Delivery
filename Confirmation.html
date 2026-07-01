@@ -1733,10 +1733,7 @@
           alert("Please take a photo of the customer premises.");
           return;
         }
-        if (!dom.porInput.files[0]) {
-          alert("Please attach the proof of residence.");
-          return;
-        }
+        // Proof of residence is optional — uploaded only if provided.
         if (collectorIsThirdParty) {
           if (!dom.collectorNameInput.value.trim()) {
             alert("Please enter the collector's full name.");
